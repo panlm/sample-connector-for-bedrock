@@ -16,6 +16,56 @@ Docker Image: [DockerHub](https://hub.docker.com/r/cloudbeer/sample-connector-fo
 
 Docker Image for Lambda: [DockerHub](https://hub.docker.com/r/cloudbeer/sample-connector-for-bedrock-lambda/tags), [Public ECR](https://gallery.ecr.aws/x6u9o2u4/sample-connector-for-bedrock-lambda)
 
+## Development
+
+This project uses [pnpm](https://pnpm.io) as its package manager (pinned via
+`packageManager: pnpm@10.34.5` in `package.json`). Use `pnpm` for all
+dependency and script commands — internal scripts (`build`, `build-server`)
+call `pnpm run`, so mixing in `npm`/`yarn` is not supported.
+
+```bash
+pnpm install   # install dependencies
+pnpm test      # run unit tests (vitest run)
+pnpm lint      # run eslint (eslint .)
+pnpm build     # build server + UI (build-server && build-ui)
+```
+
+### Tests
+
+`pnpm test` runs [Vitest](https://vitest.dev) (`vitest run`). The current suite
+(`test/helper.test.ts`) covers the pure helpers `parseModelString`, `genApiKey`
+and `generateUUID` (5 cases). External dependencies (config, model service,
+`nodemailer`, `@aws-sdk/client-s3`, logger) are isolated with `vi.mock`, so the
+tests run without a database or AWS/SMTP credentials.
+
+### Lint — known baseline
+
+`pnpm lint` runs ESLint 9 (flat config in `eslint.config.js`). It runs to
+completion, but **currently reports 11 pre-existing errors (0 warnings) and
+therefore exits non-zero**. These 11 errors all live in existing `src/` code
+(not in newly added files) and are tracked as a **known baseline** to be
+addressed in a separate task — they are not introduced by the tooling changes:
+
+| File | Line | Rule |
+|---|---|---|
+| src/providers/nova_canvas.ts | 84:25, 85:28 | no-unsafe-optional-chaining |
+| src/providers/sagemaker-deepseek.ts | 121:9, 128:9, 129:9, 130:9 | no-case-declarations |
+| src/providers/sagemaker_lmi.ts | 66:46 | no-prototype-builtins |
+| src/service/key.ts | 158:38 | no-useless-escape |
+| src/util/helper.ts | 53:13 | no-useless-catch |
+| src/util/postgres.ts | 205:24 | no-self-assign |
+| src/util/preprocess.ts | 64:7 | no-useless-catch |
+
+Until these are fixed, a clean (error-free) `pnpm lint` is not expected;
+treat "runs to completion with the 11-error baseline" as the current passing
+state.
+
+### Build
+
+`pnpm build` runs `build-server` (`tsc` → `dist/server/`) followed by
+`build-ui` (`vite build` → `dist/frontend/`). Both must succeed for the build
+to pass.
+
 ## Usage with Claude Code
 
 ```bash
