@@ -33,32 +33,29 @@ pnpm build     # build server + UI (build-server && build-ui)
 ### Tests
 
 `pnpm test` runs [Vitest](https://vitest.dev) (`vitest run`). The current suite
-(`test/helper.test.ts`) covers the pure helpers `parseModelString`, `genApiKey`
-and `generateUUID` (5 cases). External dependencies (config, model service,
-`nodemailer`, `@aws-sdk/client-s3`, logger) are isolated with `vi.mock`, so the
-tests run without a database or AWS/SMTP credentials.
+(3 files, 16 cases) covers:
 
-### Lint — known baseline
+- `test/helper.test.ts` — the pure helpers `parseModelString`, `genApiKey` and
+  `generateUUID` (5 cases).
+- `test/nova_canvas.test.ts` — the `selectChoiceOutputs` helper extracted from
+  `nova_canvas.ts`, verifying it returns `undefined` (instead of throwing) when
+  `choices.find` matches nothing, and unchanged values when a choice matches.
+- `test/key_email_regex.test.ts` — the email-key regex in `key.ts`, asserting
+  the simplified character class matches the same inputs as the original.
 
-`pnpm lint` runs ESLint 9 (flat config in `eslint.config.js`). It runs to
-completion, but **currently reports 11 pre-existing errors (0 warnings) and
-therefore exits non-zero**. These 11 errors all live in existing `src/` code
-(not in newly added files) and are tracked as a **known baseline** to be
-addressed in a separate task — they are not introduced by the tooling changes:
+External dependencies (config, model service, `nodemailer`,
+`@aws-sdk/client-s3`, logger) are isolated with `vi.mock`, so the tests run
+without a database or AWS/SMTP credentials.
 
-| File | Line | Rule |
-|---|---|---|
-| src/providers/nova_canvas.ts | 84:25, 85:28 | no-unsafe-optional-chaining |
-| src/providers/sagemaker-deepseek.ts | 121:9, 128:9, 129:9, 130:9 | no-case-declarations |
-| src/providers/sagemaker_lmi.ts | 66:46 | no-prototype-builtins |
-| src/service/key.ts | 158:38 | no-useless-escape |
-| src/util/helper.ts | 53:13 | no-useless-catch |
-| src/util/postgres.ts | 205:24 | no-self-assign |
-| src/util/preprocess.ts | 64:7 | no-useless-catch |
+### Lint
 
-Until these are fixed, a clean (error-free) `pnpm lint` is not expected;
-treat "runs to completion with the 11-error baseline" as the current passing
-state.
+`pnpm lint` runs ESLint 9 (flat config in `eslint.config.js`). It exits zero
+with **0 errors, 0 warnings** — a clean lint is the expected passing state.
+
+The 11 pre-existing `src/` errors that ESLint originally reported (the former
+"known baseline") have all been fixed without loosening any rule or adding
+`eslint-disable` comments. Note `eslint.config.js` still ignores `src/ui/**`,
+so lint covers the backend/server code only.
 
 ### Build
 
