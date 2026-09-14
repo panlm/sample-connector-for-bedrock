@@ -49,13 +49,53 @@ without a database or AWS/SMTP credentials.
 
 ### Lint
 
-`pnpm lint` runs ESLint 9 (flat config in `eslint.config.js`). It exits zero
-with **0 errors, 0 warnings** — a clean lint is the expected passing state.
+`pnpm lint` runs ESLint 9 (flat config in `eslint.config.js`) as a single
+`eslint .` invocation that now covers **both** the backend (`src/**/*.ts`) and
+the frontend (`src-frontend/**/*.{js,vue}`, Vue 3 via
+`eslint-plugin-vue`'s `flat/recommended` preset with its bundled
+`vue-eslint-parser`). The dead `src/ui/**` ignore was removed. The frontend
+has no `.ts` files and no `<script lang="ts">`, so no TypeScript parser is
+wired into the frontend block.
 
-The 11 pre-existing `src/` errors that ESLint originally reported (the former
-"known baseline") have all been fixed without loosening any rule or adding
-`eslint-disable` comments. Note `eslint.config.js` still ignores `src/ui/**`,
-so lint covers the backend/server code only.
+Because one command lints both sides, reading the numbers per area means
+splitting `eslint . --format json` by file path prefix (`src/*.ts` = backend,
+`src-frontend/*` = frontend). The current baseline:
+
+- **Backend (`src/`)**: **0 errors, 0 warnings** — must stay clean; a
+  regression here is a bug.
+- **Frontend (`src-frontend/`)**: **26 errors, 355 warnings** — this is the
+  *first recorded baseline*, not a passing state. The frontend was newly
+  brought under lint; its existing issues have **not** been fixed this round.
+
+Because the frontend has errors, `eslint .` exits non-zero (exit 1). That is
+expected for now — no rule was loosened, ignored, or `--quiet`-ed to make the
+number look better. Whether to gate CI on the frontend, fix these errors in
+batches, or show them as warnings only is a decision left to the project owner;
+fixing frontend errors is out of scope for this baseline.
+
+The frontend errors and warnings are dominated by a handful of rules. Top rules
+by combined (error + warning) count:
+
+| count | rule |
+|------:|------|
+| 176 | `vue/max-attributes-per-line` |
+|  74 | `vue/attributes-order` |
+|  61 | `vue/singleline-html-element-content-newline` |
+|  19 | `no-unused-vars` |
+|  13 | `vue/attribute-hyphenation` |
+|  10 | `vue/html-self-closing` |
+|   6 | `vue/multi-word-component-names` |
+|   6 | `vue/component-definition-name-casing` |
+|   5 | `vue/v-on-event-hyphenation` |
+|   4 | `vue/require-default-prop` |
+|   3 | `vue/prop-name-casing` |
+|   2 | `vue/html-indent` |
+|   1 | `vue/no-template-shadow` |
+|   1 | `vue/no-unused-vars` |
+
+The 26 **errors** specifically are all real rule violations (no parsing/fatal
+errors): `no-unused-vars` (19), `vue/multi-word-component-names` (6), and
+`vue/no-unused-vars` (1).
 
 ### Build
 
