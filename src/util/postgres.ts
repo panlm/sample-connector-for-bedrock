@@ -202,7 +202,14 @@ export default class PGClient {
 
   public async deleteMulti(table: string, conditions: any) {
     conditions = conditions || {};
-    const sql = `delete from ${table} where ${conditions.where} `;
+    const where = conditions.where;
+    if (typeof where !== "string" || where.trim() === "") {
+      throw new Error(
+        `deleteMulti("${table}") requires a non-empty "where"; ` +
+        `refusing to run "delete from ${table}" without a condition`
+      );
+    }
+    const sql = `delete from ${table} where ${where} `;
     const { rowCount } = await this.query(sql, conditions.params);
     return rowCount > 0;
   }
