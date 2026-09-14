@@ -26,7 +26,9 @@ call `pnpm run`, so mixing in `npm`/`yarn` is not supported.
 ```bash
 pnpm install   # install dependencies
 pnpm test      # run unit tests (vitest run)
-pnpm lint      # run eslint (eslint .)
+pnpm lint      # blocking gate: lint everything except src-frontend/** (must exit 0)
+pnpm lint:ui   # cleanup baseline: lint src-frontend/** (reports 26/355, exits non-zero)
+pnpm lint:all  # informational: lint the whole repo (exit 1 until frontend is clean)
 pnpm build     # build server + UI (build-server && build-ui)
 ```
 
@@ -49,29 +51,36 @@ without a database or AWS/SMTP credentials.
 
 ### Lint
 
-`pnpm lint` runs ESLint 9 (flat config in `eslint.config.js`) as a single
-`eslint .` invocation that now covers **both** the backend (`src/**/*.ts`) and
-the frontend (`src-frontend/**/*.{js,vue}`, Vue 3 via
-`eslint-plugin-vue`'s `flat/recommended` preset with its bundled
-`vue-eslint-parser`). The dead `src/ui/**` ignore was removed. The frontend
-has no `.ts` files and no `<script lang="ts">`, so no TypeScript parser is
-wired into the frontend block.
+Lint is a **ratchet**: one flat config (`eslint.config.js`) covers both the
+backend (`src/**/*.ts`) and the frontend (`src-frontend/**/*.{js,vue}`, Vue 3
+via `eslint-plugin-vue`'s `flat/recommended` preset with its bundled
+`vue-eslint-parser`), but three scripts split it into a blocking line and a
+cleanup baseline. No rule is loosened and nothing is added to `ignores` — the
+split is done purely with `--ignore-pattern` on the `lint` script, so
+`git diff eslint.config.js` is empty.
 
-Because one command lints both sides, reading the numbers per area means
-splitting `eslint . --format json` by file path prefix (`src/*.ts` = backend,
-`src-frontend/*` = frontend). The current baseline:
+- **`pnpm lint` — blocking line (must exit 0).** Runs
+  `eslint . --ignore-pattern 'src-frontend/**'`, i.e. everything that has
+  already been driven to zero: backend `src/**/*.ts`, `scripts/`, and the root
+  config files (`babel.config.js`, `eslint.config.js`, `vite.config.js`).
+  Current numbers: **0 errors, 0 warnings**. This is the line CI gates on
+  (`.github/workflows/build.yml` runs `pnpm lint`) — a regression here is a bug
+  and must not land.
+- **`pnpm lint:ui` — cleanup baseline (allowed to exit non-zero).** Runs
+  `eslint src-frontend`. Current numbers: **26 errors, 355 warnings**, exit 1.
+  This is the *first recorded frontend baseline*, not a passing state; the
+  frontend was newly brought under lint and its existing issues are **not**
+  fixed here (that is a separate effort, cleaned in batches). These numbers
+  must stay reproducible — if they change, a rule or `ignores` was touched.
+- **`pnpm lint:all` — informational (non-blocking).** Runs `eslint .` over the
+  whole repo; exits 1 until the frontend baseline is cleared. Use it locally to
+  see everything at once.
 
-- **Backend (`src/`)**: **0 errors, 0 warnings** — must stay clean; a
-  regression here is a bug.
-- **Frontend (`src-frontend/`)**: **26 errors, 355 warnings** — this is the
-  *first recorded baseline*, not a passing state. The frontend was newly
-  brought under lint; its existing issues have **not** been fixed this round.
-
-Because the frontend has errors, `eslint .` exits non-zero (exit 1). That is
-expected for now — no rule was loosened, ignored, or `--quiet`-ed to make the
-number look better. Whether to gate CI on the frontend, fix these errors in
-batches, or show them as warnings only is a decision left to the project owner;
-fixing frontend errors is out of scope for this baseline.
+Rationale for `--ignore-pattern` over editing the config's `ignores`: `lint:ui`
+(`eslint src-frontend`) reads the same flat config, so putting the frontend
+into a global `ignores` would silence it there too and the 26/355 baseline
+would vanish — violating the "must stay reproducible" rule. `--ignore-pattern`
+scopes the exclusion to the `lint` script alone.
 
 The frontend errors and warnings are dominated by a handful of rules. Top rules
 by combined (error + warning) count:
