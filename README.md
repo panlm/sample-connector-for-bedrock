@@ -16,6 +16,17 @@ Docker Image: [DockerHub](https://hub.docker.com/r/cloudbeer/sample-connector-fo
 
 Docker Image for Lambda: [DockerHub](https://hub.docker.com/r/cloudbeer/sample-connector-for-bedrock-lambda/tags), [Public ECR](https://gallery.ecr.aws/x6u9o2u4/sample-connector-for-bedrock-lambda)
 
+## Development
+
+This project uses [pnpm](https://pnpm.io) (pnpm 10) as its package manager.
+
+```bash
+pnpm install   # install dependencies
+pnpm test      # run unit tests (vitest)
+pnpm lint      # run eslint
+pnpm build     # build server + UI
+```
+
 ## Usage with Claude Code
 
 ```bash
