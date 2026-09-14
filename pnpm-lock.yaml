@@ -132,6 +132,9 @@ importers:
       eslint-plugin-vue:
         specifier: ^10.7.0
         version: 10.7.0(@typescript-eslint/parser@8.70.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(vue-eslint-parser@10.2.0(eslint@9.39.2))
+      globals:
+        specifier: ^14.0.0
+        version: 14.0.0
       hash-sum:
         specifier: ^2.0.0
         version: 2.0.0
