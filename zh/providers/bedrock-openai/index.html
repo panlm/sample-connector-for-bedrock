@@ -3,21 +3,21 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="自 Docker 镜像版本 0.0.32 起可用">
+        <meta name="description" content="该 Provider 通过 Amazon Bedrock 的 OpenAI 兼容 接口（/openai/v1/chat/completions 路径）调用 Bedrock 模型，让你用标准的 OpenAI Chat Completions 报文驱动 Bedrock，同时 BRConnector 入站侧的 br- key / group / 配额行为完全不变。">
       
       
       
-        <link rel="canonical" href="https://aws-samples.github.io/sample-connector-for-bedrock/zh/providers/azure-openai/">
+        <link rel="canonical" href="https://aws-samples.github.io/sample-connector-for-bedrock/zh/providers/bedrock-openai/">
       
       
-        <link rel="prev" href="../azure-openai-image/">
+        <link rel="prev" href="../bedrock-knowledge-base/">
       
       
-        <link rel="next" href="../bedrock-agent/">
+        <link rel="next" href="../continue_coder/">
       
       
         
-          <link rel="alternate" href="../../../providers/azure-openai/" hreflang="en">
+          <link rel="alternate" href="../../../providers/bedrock-openai/" hreflang="en">
         
           <link rel="alternate" href="./" hreflang="zh">
         
@@ -28,7 +28,7 @@
     
     
       
-        <title>azure-openai - Sample Connector for Bedrock</title>
+        <title>bedrock-openai - Sample Connector for Bedrock</title>
       
     
     
@@ -95,7 +95,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#azure-openai" class="md-skip">
+        <a href="#bedrock-openai" class="md-skip">
           跳转至
         </a>
       
@@ -131,7 +131,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              azure-openai
+              bedrock-openai
             
           </span>
         </div>
@@ -178,7 +178,7 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../../providers/azure-openai/" hreflang="en" class="md-select__link">
+            <a href="../../../providers/bedrock-openai/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -1183,37 +1183,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    azure-openai
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../azure-openai/" class="md-nav__link">
         
   
   
@@ -1229,48 +1202,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目录">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        配置
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        输出结果
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1392,10 +1323,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../bedrock-openai/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    bedrock-openai
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1411,6 +1369,109 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        两个 endpoint 怎么选
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modelid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        modelId 处理（前缀差异）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        按模型家族做参数裁剪
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM 前提
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知陷阱
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1794,13 +1855,74 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
       
-        <li class="md-nav__item">
+        两个 endpoint 怎么选
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modelid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        modelId 处理（前缀差异）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        输出结果
+        按模型家族做参数裁剪
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM 前提
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知陷阱
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例
       
     </span>
   </a>
@@ -1827,16 +1949,19 @@
   
 
 
-<h1 id="azure-openai">azure-openai<a class="headerlink" href="#azure-openai" title="Permanent link">¶</a></h1>
+<h1 id="bedrock-openai">bedrock-openai<a class="headerlink" href="#bedrock-openai" title="Permanent link">¶</a></h1>
+<p>该 Provider 通过 Amazon Bedrock 的 <strong>OpenAI 兼容</strong> 接口（<code>/openai/v1/chat/completions</code> 路径）调用 Bedrock 模型，让你用标准的 OpenAI Chat Completions 报文驱动 Bedrock，同时 BRConnector 入站侧的 <code>br-</code> key / group / 配额行为完全不变。</p>
+<p>与 <code>openai-compatible</code> 不同，本 Provider <strong>不要求</strong>静态 API key。它默认从 AWS SDK 默认凭证链现场铸造一个短期 Bedrock bearer token，因此 EC2 instance role / Lambda execution role 即可直接使用，模型配置里无需存放任何静态密钥。</p>
 <blockquote>
-<p>自 Docker 镜像版本 0.0.32 起可用</p>
+<p>增量新增，不改动现有的 <code>bedrock-converse</code> 和 <code>openai-compatible</code>。要用 Bedrock 的 <code>Converse</code> / <code>InvokeModel</code> 接口请用 <code>bedrock-converse</code>；只有当你确实需要对 Bedrock 发 OpenAI Chat Completions 报文时才用本 Provider。</p>
 </blockquote>
-<p>Azure OpenAI 服务接口。</p>
-<p>将消息发送到指定的 Azure OpenAI 模型。此提供程序允许您连接到 Azure OpenAI 部署并通过 Sample Connector for Bedrock 使用它们。</p>
 <h2 id="_1">配置<a class="headerlink" href="#_1" title="Permanent link">¶</a></h2>
-<p>通过 Azure OpenAI API 调用模型。您可以使用此提供程序配置 Azure OpenAI 部署。</p>
-<p><a href="https://learn.microsoft.com/zh-cn/azure/ai-services/openai/">Azure OpenAI 服务文档</a> 解释了如何使用 Azure OpenAI API 以及它支持的功能。</p>
-<p>建议使用此提供程序连接到 Azure OpenAI 部署。</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">"modelId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"global.openai.gpt-6-astra"</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">"regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"us-west-2"</span><span class="p">],</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">"endpointType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bedrock-runtime"</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
+</code></pre></div>
 <table>
 <thead>
 <tr>
@@ -1844,63 +1969,171 @@
 <th>类型</th>
 <th>必填</th>
 <th>默认值</th>
-<th>描述</th>
+<th>说明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>apiKey</td>
+<td>modelId</td>
 <td>string</td>
 <td>是</td>
 <td></td>
-<td>您的 Azure OpenAI API 密钥</td>
+<td>Bedrock 模型 id。按 <strong>runtime</strong> 形态填写（需要推理配置前缀的模型带上 <code>us.</code> / <code>global.</code>，如 <code>global.openai.gpt-6-astra</code>）。详见下方 modelId 处理。</td>
+</tr>
+<tr>
+<td>regions / region</td>
+<td>string[] 或 string</td>
+<td>是</td>
+<td></td>
+<td>单个 region，或一个列表（每次请求随机选一个）。代码里不硬编码 region。<code>region</code> 与 <code>regions</code> 均可。</td>
+</tr>
+<tr>
+<td>endpointType</td>
+<td>string</td>
+<td>否</td>
+<td><code>bedrock-runtime</code></td>
+<td><code>bedrock-runtime</code> 或 <code>bedrock-mantle</code>。会自动选择对应的 host <strong>和</strong> SigV4 service name（见下）。</td>
 </tr>
 <tr>
 <td>baseURL</td>
 <td>string</td>
-<td>是</td>
-<td></td>
-<td>Azure OpenAI 部署的基础 URL，包括部署名称（例如：”<a href="https://your-resource-name.openai.azure.com/openai/deployments/your-deployment-name&quot;）">https://your-resource-name.openai.azure.com/openai/deployments/your-deployment-name"）</a></td>
+<td>否</td>
+<td>自动推导</td>
+<td>逃生口：指向私有 / 自定义 endpoint。配了就原样作为 base URL；SigV4 service name 仍按 <code>endpointType</code> 推导。</td>
 </tr>
 <tr>
-<td>apiVersion</td>
-<td>string</td>
-<td>是</td>
+<td>modelIdOverrides</td>
+<td>object</td>
+<td>否</td>
 <td></td>
-<td>要使用的 Azure OpenAI API 版本（例如：”2023-05-15” 或 “2025-01-01-preview”）</td>
+<td>按 endpoint 覆盖 modelId，如 <code>{"bedrock-mantle": "openai.gpt-6-astra"}</code>。命中当前 endpoint 的键时，优先于自动换算。</td>
+</tr>
+<tr>
+<td>bearerToken</td>
+<td>string</td>
+<td>否</td>
+<td></td>
+<td>静态 Bedrock API key。配了则直接作为出站 bearer token 使用（不铸造）。</td>
+</tr>
+<tr>
+<td>credentials</td>
+<td>array</td>
+<td>否</td>
+<td></td>
+<td>静态 AKSK 凭证组。配了（且未配 <code>bearerToken</code>）时选一组用于铸造出站 token。</td>
 </tr>
 </tbody>
 </table>
-<p>配置示例：</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">"apiKey"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;your-key&gt;"</span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">"baseURL"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://your-resource-name.openai.azure.com/openai/deployments/your-deployment-name"</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">"apiVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-01-01-preview"</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
-</code></pre></div>
-<h2 id="_2">输出结果<a class="headerlink" href="#_2" title="Permanent link">¶</a></h2>
-<p>输出遵循标准 OpenAI API 格式：</p>
+<p><code>bearerToken</code> 与 <code>credentials</code> 都不配时，回落到 AWS SDK 默认凭证链（instance role）—— 这是推荐的生产形态，也与现有 CloudFormation 部署的运行方式一致。</p>
+<h3 id="endpoint">两个 endpoint 怎么选<a class="headerlink" href="#endpoint" title="Permanent link">¶</a></h3>
+<p>两个 endpoint 服务的是同一个底层推理引擎、同一个 <code>/openai/v1/chat/completions</code> 路径；差异在于各自独有的能力和 IAM action：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>bedrock-runtime</code></th>
+<th><code>bedrock-mantle</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Host</td>
+<td><code>bedrock-runtime.{region}.amazonaws.com</code></td>
+<td><code>bedrock-mantle.{region}.api.aws</code></td>
+</tr>
+<tr>
+<td>SigV4 service name</td>
+<td><code>bedrock</code></td>
+<td><code>bedrock-mantle</code></td>
+</tr>
+<tr>
+<td>IAM action（调用）</td>
+<td><code>bedrock:InvokeModel</code></td>
+<td><code>bedrock-mantle:CreateInference</code></td>
+</tr>
+<tr>
+<td><code>Converse</code> / <code>InvokeModel</code></td>
+<td>支持（走 <code>bedrock-converse</code>）</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>Guardrails / 智能提示路由</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>服务端工具（web search）、<code>background=true</code> 异步、Projects / Workspaces</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+</tbody>
+</table>
+<p>经验法则：默认用 <code>bedrock-runtime</code>（AWS 对大多数新应用的推荐）。只有当你需要某个 mantle 独有能力时才选 <code>bedrock-mantle</code>。</p>
+<blockquote>
+<p>注意：mantle 独有能力（服务端工具、<code>background=true</code>、Projects / Workspaces）与 Responses API（<code>/openai/v1/responses</code>）<strong>本轮未实现</strong> —— 本 Provider 只发 Chat Completions。调用面已隔离，后续要加这些能力无需改动 endpoint / 认证 / modelId / 参数逻辑。</p>
+</blockquote>
+<h3 id="modelid">modelId 处理（前缀差异）<a class="headerlink" href="#modelid" title="Permanent link">¶</a></h3>
+<p>同一个模型在两个 endpoint 上写法不同，本 Provider 自动换算以免踩 404：</p>
+<ul>
+<li><strong>runtime</strong>：按配置原样发送，保留 <code>us.</code> / <code>global.</code> 推理配置前缀（前缀是你的显式选择）。</li>
+<li><strong>mantle</strong>：机械地去掉推理配置前缀（<code>global.</code> / <code>us.</code> / <code>eu.</code> / <code>apac.</code>），因为 mantle 只收裸 modelId —— 带前缀会返回 <code>404 The model ... does not exist</code>。</li>
+</ul>
+<p>所以 <code>modelId</code> 按 <strong>runtime</strong> 形态填一次即可；把 <code>endpointType</code> 切成 <code>bedrock-mantle</code> 会自动换算。若某模型需要在某个 endpoint 上手动钉死写法，用 <code>modelIdOverrides</code>。</p>
+<h3 id="_2">按模型家族做参数裁剪<a class="headerlink" href="#_2" title="Permanent link">¶</a></h3>
+<p>Bedrock 对推理参数的容忍度按模型家族不同，因此按家族裁剪而非一刀切。<strong>本 Provider 不注入任何默认 <code>temperature</code> / <code>top_p</code></strong> —— 只转发客户端实际传来的值（裁剪后）：</p>
+<ul>
+<li><strong><code>gpt-5.6-*</code> / <code>gpt-6-*</code></strong>：<code>temperature</code> 只接受默认值 <code>1</code>，其它值一律剔除（Bedrock 返回 <code>400 Unsupported value: 'temperature' does not support 0.7 ...</code>）；<code>top_p</code>、<code>reasoning_effort</code> 一律剔除。</li>
+<li><strong><code>gpt-oss-*</code></strong>：<code>temperature</code>、<code>top_p</code>、<code>reasoning_effort</code> 原样透传。</li>
+<li><strong>其它 OpenAI 家族</strong>：透传客户端显式值，不注入。</li>
+</ul>
+<h2 id="iam">IAM 前提<a class="headerlink" href="#iam" title="Permanent link">¶</a></h2>
+<p>出站身份（instance role / execution role，或你配置的静态凭证）必须有权调用所选 endpoint：</p>
+<table>
+<thead>
+<tr>
+<th>endpointType</th>
+<th>所需 IAM action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bedrock-runtime</code></td>
+<td><code>bedrock:InvokeModel</code>、<code>bedrock:InvokeModelWithResponseStream</code></td>
+</tr>
+<tr>
+<td><code>bedrock-mantle</code></td>
+<td><code>bedrock-mantle:CreateInference</code></td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong>随仓库的 <code>cloudformation/quick-build-brconnector.yaml</code> 只授予了 <code>bedrock:InvokeModel*</code> / <code>bedrock:ListFoundationModels</code>。</strong> 若你配置 <code>bedrock-mantle</code> endpoint，<code>bedrock-mantle:CreateInference</code> <strong>不在</strong>模板里，需要你自行加到 role 的 inline policy —— 否则 mantle 调用会被拒。本轮有意未改模板；在其被合入模板前，加这条 action 属于部署时的步骤。</p>
+<p>铸造短期 bearer token 本身走 AWS SDK 默认凭证链（<code>@aws/bedrock-token-generator</code>）；token 有缓存（约 1h TTL，过期前约 5 分钟刷新），且绝不写入 <code>process.env</code>。</p>
+<h2 id="_3">已知陷阱<a class="headerlink" href="#_3" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>模型行要绑 group。</strong> 新建的模型行如果没绑到 group（<code>eiai_group_model</code>），调用会报 <code>You do not have permission to access the [xxx] model</code>。这是 BRConnector 正常的入站行为，不是 provider 写坏了 —— 加模型时连带绑好 group。</li>
+<li><strong>约 60 秒 model 缓存。</strong> 改完模型配置后，要等一轮缓存刷新（日志里 <code>The cache has been flushed</code>）才能在 <code>/v1/models</code> 看到。</li>
+</ul>
+<h2 id="_4">示例<a class="headerlink" href="#_4" title="Permanent link">¶</a></h2>
+<p><code>bedrock-runtime</code>（推荐）+ instance role + 无静态密钥：</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chatcmpl-123"</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">"object"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chat.completion"</span><span class="p">,</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">"created"</span><span class="p">:</span><span class="w"> </span><span class="mi">1677858242</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gpt-4o"</span><span class="p">,</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">"choices"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"这是来自 Azure OpenAI 模型的响应。"</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">      </span><span class="p">},</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">      </span><span class="nt">"finish_reason"</span><span class="p">:</span><span class="w"> </span><span class="s2">"stop"</span><span class="p">,</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">      </span><span class="nt">"index"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span><span class="p">],</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="nt">"usage"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="nt">"prompt_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="nt">"completion_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="nt">"total_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">}</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">"modelId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"global.openai.gpt-6-astra"</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">"regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"us-west-2"</span><span class="p">],</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">"endpointType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bedrock-runtime"</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+</code></pre></div>
+<p>同一模型走 <code>bedrock-mantle</code>（前缀自动去成 <code>openai.gpt-6-astra</code>）：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"modelId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"global.openai.gpt-6-astra"</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">"regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"us-west-2"</span><span class="p">],</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">"endpointType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bedrock-mantle"</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>gpt-oss</code> 模型 —— 客户端可自由传 <code>temperature</code>：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"modelId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"openai.gpt-oss-120b-1:0"</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"us-west-2"</span><span class="p">],</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"endpointType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bedrock-runtime"</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">}</span>
 </code></pre></div>
 
 
@@ -1924,7 +2157,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="2025年5月18日 14:20:26 CST"><span class="timeago" datetime="2025-05-18T14:20:26+08:00" locale="zh"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="2025年5月18日 14:20:26 CST">2025-05-18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="2026年9月16日 00:09:11 CST"><span class="timeago" datetime="2026-09-16T00:09:11+08:00" locale="zh"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="2026年9月16日 00:09:11 CST">2026-09-16</span>
   </span>
 
     
@@ -1934,7 +2167,7 @@
     <span class="md-icon" title="创建日期">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="2025年5月18日 14:20:26 CST"><span class="timeago" datetime="2025-05-18T14:20:26+08:00" locale="zh"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="2025年5月18日 14:20:26 CST">2025-05-18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="2026年9月16日 00:09:11 CST"><span class="timeago" datetime="2026-09-16T00:09:11+08:00" locale="zh"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="2026年9月16日 00:09:11 CST">2026-09-16</span>
   </span>
 
     
