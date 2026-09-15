@@ -19,6 +19,16 @@ describe('parseModelString', () => {
   it('按第一个 / 切分', () => {
     expect(helper.parseModelString('a/b/c')).toEqual({ model: 'a', model_id: 'b/c' });
   });
+  // BMAD-20 回归：任一侧为空串不是合法切分 → null（不许被当合法值放过）
+  it('空 model（"/claude-3"） → null', () => {
+    expect(helper.parseModelString('/claude-3')).toBeNull();
+  });
+  it('空 model_id（"bedrock/"） → null', () => {
+    expect(helper.parseModelString('bedrock/')).toBeNull();
+  });
+  it('两侧皆空（"/"） → null', () => {
+    expect(helper.parseModelString('/')).toBeNull();
+  });
 });
 
 describe('genApiKey', () => {
