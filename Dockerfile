@@ -9,7 +9,7 @@ WORKDIR /app
 RUN npm install --omit=dev
 
 HEALTHCHECK --interval=5s --timeout=3s \
-  CMD curl -fs http://localhost:8866/ || exit 1
+  CMD curl -fs http://localhost:8866/health || exit 1
 
 EXPOSE 8866
 
