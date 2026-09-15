@@ -8,12 +8,15 @@ This project mainly provides sample code, and it is strongly recommended that yo
 
 Clone the repository.
 
+This project uses [pnpm](https://pnpm.io) as its package manager (pinned via
+`packageManager: pnpm@10.34.5` in `package.json`). Internal scripts such as
+`build` and `build-server` call `pnpm run`, so mixing in `npm`/`yarn` is not
+supported.
+
 Install dependencies:
 
 ```shell
-npm install
-# or
-yarn
+pnpm install
 ```
 
 ### Environment
@@ -59,9 +62,7 @@ The connector supports the following environment variables:
 ### Run backend
 
  ```shell
- npm run dev
- # or
- yarn dev
+ pnpm dev
  ```
 
  If you have configured postgres, the tables will be created automatically.
@@ -69,22 +70,29 @@ The connector supports the following environment variables:
 ### Run fontend
 
  ```shell
- npm run dev-ui
- # or
- yarn dev-ui
+ pnpm dev-ui
  ```
+
+## Tests and lint
+
+```shell
+pnpm test      # run the unit test suite (vitest run)
+pnpm lint      # blocking lint gate — must exit 0
+pnpm lint:ui   # frontend lint baseline (reports issues, exits non-zero)
+```
+
+See the **Development → Tests / Lint** sections of the repository `README.md`
+for the full baseline (suite layout, the lint ratchet, and its current numbers).
 
 ## Build
 
 ### Build the backend and frontend together
 
 ```shell
-npm run build
-# or
-yarn build
+pnpm build
 ```
 
-The above command will compile the frontend and backend applications into the dist/public and dist/server directories, respectively.
+The above command will compile the frontend and backend applications into the dist/frontend and dist/server directories, respectively.
 
 After a successful compilation, navigate to the dist directory and execute `node server/index.js`.
 
@@ -93,50 +101,23 @@ If you have not disabled the WebUI, <http://localhost:8866/manager> will be boun
 ### Build back-end (Option)
 
 ```shell
-npm run build-server
-# or
-yarn build-server
+pnpm build-server
 ```
 
 ### Build front-end (Option)
 
 ```shell
-npm run build-ui
-# or
-yarn build-ui
+pnpm build-ui
 ```
 
 ### Build Docker image
 
-After building, you can use Dockerfile to build Docker image.
+After building, use the `Dockerfile` already provided in the repository root to
+build the image — you do not need to create one. It is based on
+`public.ecr.aws/docker/library/node:22-slim`, copies the built `./dist` into the
+image, runs `npm install --omit=dev`, and starts `node server/index.js`.
 
-The content of the Dockerfile:
-
-```dockerfile
-FROM node:20
-
-RUN apt update && apt install -y awscli
-
-COPY ./dist /app
-WORKDIR /app
-COPY ./src/scripts/* ./src/scripts/
-COPY ./package.json .
-
-RUN npm install --omit=dev
-
-HEALTHCHECK --interval=5s --timeout=3s \
-  CMD curl -fs http://localhost:8866/ || exit 1
-
-EXPOSE 8866
-
-CMD ["node", "server/index.js"]
-
-```
-
-!!! note
-    Please note: The above code is not included in this project. Please save the above content in the project's root directory `./Dockerfile`.
-
-Then execute the following command:
+Then execute the following command from the repository root:
 
 ```shell
 docker build -t <registry-repo-tag> .
