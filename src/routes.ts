@@ -3,6 +3,7 @@ import Router from "koa-router";
 import v1 from './controller/runtime/v1';
 import anthropic from './controller/runtime/anthropic';
 import models from './controller/runtime/models';
+import health from './controller/health';
 import config from './config';
 import admin_statistics_controller from './controller/admin/StatisticsController';
 import admin_key_controller from './controller/admin/KeyController';
@@ -26,6 +27,10 @@ import user_model_controller from './controller/user/ModelController';
 // import user_thread from './controller/user/thread';
 
 export const router = new Router();
+
+// Health probes (免鉴权，authHandler 不 gate /health*)
+router.get('/health', health.liveness);
+router.get('/health/ready', health.readiness);
 
 // AI API
 router.post("/v1/chat/completions", v1.chat_completions);
