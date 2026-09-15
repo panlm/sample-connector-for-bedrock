@@ -35,7 +35,7 @@ pnpm build     # build server + UI (build-server && build-ui)
 ### Tests
 
 `pnpm test` runs [Vitest](https://vitest.dev) (`vitest run`). The current suite
-(6 files, 29 cases) covers:
+(9 files, 62 cases) covers:
 
 - `test/helper.test.ts` — the pure helpers `parseModelString`, `genApiKey` and
   `generateUUID` (5 cases).
@@ -55,6 +55,18 @@ pnpm build     # build server + UI (build-server && build-ui)
 - `test/prepare-dist-package.test.ts` — `makeRuntimePackage`, asserting the
   runtime `package.json` drops `devDependencies`/`scripts`/`pnpm` and keeps
   `dependencies`/`version`/whitelisted fields (6 cases).
+- `test/bedrock_converse_inference.test.ts` — `buildBaseInferenceParams`,
+  asserting non-anthropic models no longer get `temperature`/`topP` injected
+  unconditionally while the anthropic branch keeps its `0.7` defaults (6 cases).
+- `test/bedrock_openai_endpoint.test.ts` — the OpenAI-compatible Bedrock
+  endpoint helpers (`endpointConfig`, `toEndpointModelId`, `modelFamily` +
+  `trimInferenceParams`, `resolveAuthMode`), covering runtime/mantle service
+  and host derivation, model-id prefix trimming, per-family inference-param
+  trimming, and auth-mode precedence (21 cases).
+- `test/bedrock_token.test.ts` — `getBedrockBearerToken`'s cache and
+  refresh-before-expiry logic, asserting single minting on cache hits, re-mint
+  past the expiry skew, and independent cache keys per credential source and
+  service (6 cases).
 
 External dependencies (config, model service, `nodemailer`,
 `@aws-sdk/client-s3`, logger) are isolated with `vi.mock`, so the tests run

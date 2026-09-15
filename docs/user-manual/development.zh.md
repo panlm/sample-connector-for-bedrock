@@ -6,12 +6,14 @@
 
 Clone 本项目。
 
+本项目使用 [pnpm](https://pnpm.io) 作为包管理器（在 `package.json` 中通过
+`packageManager: pnpm@10.34.5` 固定版本）。`build`、`build-server` 等内部脚本会
+调用 `pnpm run`，因此不支持混用 `npm`/`yarn`。
+
 安装依赖：
 
 ```shell
-npm install
-# or
-yarn
+pnpm install
 ```
 
 ### 环境变量配置
@@ -57,9 +59,7 @@ yarn
 ### 启动后台
 
  ```shell
- npm run dev
- # or
- yarn dev
+ pnpm dev
  ```
 
  If you have configured postgres, the tables will be created automatically.
@@ -67,22 +67,29 @@ yarn
 ### 启动管理界面
 
  ```shell
- npm run dev-ui
- # or
- yarn dev-ui
+ pnpm dev-ui
  ```
+
+## 测试与 lint
+
+```shell
+pnpm test      # 运行单元测试套件（vitest run）
+pnpm lint      # 阻塞式 lint 门禁 —— 必须退出码为 0
+pnpm lint:ui   # 前端 lint 基线（会报告问题，退出码非 0）
+```
+
+完整基线（套件结构、lint ratchet 及当前数字）见仓库 `README.md` 的
+**Development → Tests / Lint** 章节。
 
 ## 构建
 
 ### 一起构建
 
 ```shell
-npm run build
-# or
-yarn build
+pnpm build
 ```
 
-The above command will compile the frontend and backend applications into the dist/public and dist/server directories, respectively.
+The above command will compile the frontend and backend applications into the dist/frontend and dist/server directories, respectively.
 
 After a successful compilation, navigate to the dist directory and execute `node server/index.js`.
 
@@ -91,50 +98,22 @@ If you have not disabled the WebUI, <http://localhost:8866/manager> will be boun
 ### 构建后端 (可选)
 
 ```shell
-npm run build-server
-# or
-yarn build-server
+pnpm build-server
 ```
 
 ### 构建前端 (可选)
 
 ```shell
-npm run build-ui
-# or
-yarn build-ui
+pnpm build-ui
 ```
 
 ### Docker 镜像
 
-编译完成之后，你可以使用  Dockerfile 来构建你的镜像。
+编译完成之后，直接使用仓库根目录中**已有的** `Dockerfile` 构建镜像，无需自行创建。
+该 Dockerfile 基于 `public.ecr.aws/docker/library/node:22-slim`，将构建产物 `./dist`
+拷入镜像，执行 `npm install --omit=dev`，并以 `node server/index.js` 启动。
 
-The content of the Dockerfile:
-
-```dockerfile
-FROM node:20
-
-RUN apt update && apt install -y awscli
-
-COPY ./dist /app
-WORKDIR /app
-COPY ./src/scripts/* ./src/scripts/
-COPY ./package.json .
-
-RUN npm install --omit=dev
-
-HEALTHCHECK --interval=5s --timeout=3s \
-  CMD curl -fs http://localhost:8866/ || exit 1
-
-EXPOSE 8866
-
-CMD ["node", "server/index.js"]
-
-```
-
-!!! note
-    上面的 Dockefile 没有包含在项目中。
-
-然后执行打包命令：
+然后在仓库根目录执行打包命令：
 
 ```shell
 docker build -t <registry-repo-tag> .
