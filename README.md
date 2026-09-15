@@ -146,6 +146,55 @@ Models and their parameters can be defined from the backend.
 
 Once defined, models can be bound to groups or API Keys.
 
+### Default seed models
+
+On first install BRConnector seeds a default model list into `eiai_model`
+(`src/scripts/patch-0.0.5.sql`). The Claude seeds were rebuilt because Bedrock
+now marks the old Claude 3.x models as **Legacy** and rejects `converse` on them.
+
+- **Global cross-region profiles.** Both Claude seeds use the `global.` prefix
+  (`global.anthropic.claude-sonnet-4-6`, `global.anthropic.claude-opus-4-8`).
+  `global.` routes across all regions, so **one seed list works everywhere** —
+  we no longer ship per-region lists. (The old `us.` prefix is US-only; switching
+  an `us.`-seeded install to `eu.`/`apac.` regions leaves half the list unusable.)
+
+- **Seeds are only a starting point.** Whether a model actually answers depends
+  on **your account's Bedrock model access**, not on this seed list. A model can
+  be `ACTIVE` in `list-inference-profiles` yet still be rejected at call time
+  (e.g. Legacy models, or on-demand-unsupported models that require an inference
+  profile). Always verify against your own account. Self-check commands:
+
+  ```bash
+  # Which cross-region inference profiles are ACTIVE in your region
+  aws bedrock list-inference-profiles --region <your-region>
+  # Which foundation models your account can see
+  aws bedrock list-foundation-models --region <your-region>
+  # Confirm a model actually answers (ACTIVE != callable):
+  aws bedrock-runtime converse --region <your-region> \
+    --model-id global.anthropic.claude-sonnet-4-6 \
+    --messages '[{"role":"user","content":[{"text":"ping"}]}]'
+  ```
+
+- **Verifying a model through BRConnector.** After changing a model's `modelId`
+  in the admin UI, the app caches the model list and refreshes it about once a
+  minute (log line `The cache has been flushed`). So the loop is: change the
+  `modelId` → wait ~60s for the cache flush → `POST /v1/chat/completions` once.
+  Calling before the flush shows the old list in `/v1/models` and looks like the
+  change didn't take.
+
+- **Newly created models need a group binding.** A model with no group binding
+  returns `You do not have permission to access the [xxx] model`. The seed
+  migrations bind the default Claude seeds to `group 1` automatically.
+
+> [!IMPORTANT]
+> **Upgrading an existing database:** the seed rebuild ships as a guarded
+> migration (`src/scripts/patch-0.0.42.sql`) that runs once on existing
+> installs — it deletes the 10 legacy Claude 3.x seed rows and inserts the 2
+> current Claude seeds. It only removes rows that still carry their original
+> legacy `modelId` (rows you re-pointed to a working model, and any models you
+> added yourself, are left untouched). **Back up your database before
+> upgrading** so a legacy row can be restored if needed.
+
 ## Changelogs
 
 ## 0.0.41

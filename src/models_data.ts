@@ -24,7 +24,7 @@ export default [
         "owned_by": "aws-bedrock"
     },
     {
-        "id": "claude-3.5-sonnet-v2",
+        "id": "claude-sonnet-4-6",
         "object": "model",
         "created": 1712297572,
         "multiple": true,
@@ -32,42 +32,10 @@ export default [
         "owned_by": "aws-bedrock"
     },
     {
-        "id": "claude-3.5-sonnet",
+        "id": "claude-opus-4-8",
         "object": "model",
         "created": 1712297572,
         "multiple": true,
-        "deleted": false,
-        "owned_by": "aws-bedrock"
-    },
-    {
-        "id": "claude-3.5-haiku",
-        "object": "model",
-        "created": 1712297572,
-        "multiple": true,
-        "deleted": false,
-        "owned_by": "aws-bedrock"
-    },
-    {
-        "id": "claude-3-sonnet",
-        "object": "model",
-        "created": 1712297572,
-        "multiple": true,
-        "deleted": false,
-        "owned_by": "aws-bedrock"
-    },
-    {
-        "id": "claude-3-haiku",
-        "object": "model",
-        "multiple": true,
-        "created": 1712297572,
-        "deleted": false,
-        "owned_by": "aws-bedrock"
-    },
-    {
-        "id": "claude-3-opus",
-        "object": "model",
-        "multiple": true,
-        "created": 1712297572,
         "deleted": false,
         "owned_by": "aws-bedrock"
     },
