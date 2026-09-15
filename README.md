@@ -35,15 +35,26 @@ pnpm build     # build server + UI (build-server && build-ui)
 ### Tests
 
 `pnpm test` runs [Vitest](https://vitest.dev) (`vitest run`). The current suite
-(3 files, 16 cases) covers:
+(6 files, 29 cases) covers:
 
 - `test/helper.test.ts` — the pure helpers `parseModelString`, `genApiKey` and
   `generateUUID` (5 cases).
 - `test/nova_canvas.test.ts` — the `selectChoiceOutputs` helper extracted from
   `nova_canvas.ts`, verifying it returns `undefined` (instead of throwing) when
-  `choices.find` matches nothing, and unchanged values when a choice matches.
+  `choices.find` matches nothing, and unchanged values when a choice matches
+  (3 cases).
 - `test/key_email_regex.test.ts` — the email-key regex in `key.ts`, asserting
-  the simplified character class matches the same inputs as the original.
+  the simplified character class matches the same inputs as the original
+  (8 cases).
+- `test/postgres_delete_multi.test.ts` — `deleteMulti`'s `where` guard, asserting
+  it throws (and never calls `query`) on missing/empty `where` and passes the
+  built SQL and params through otherwise (4 cases).
+- `test/thread_list_key_id.test.ts` — `/user/thread/list` injecting `key_id`,
+  asserting a forged `key_id` is overridden by `ctx.user.id` and the existing
+  `/user/thread/detail` authorization behaviour is unchanged (3 cases).
+- `test/prepare-dist-package.test.ts` — `makeRuntimePackage`, asserting the
+  runtime `package.json` drops `devDependencies`/`scripts`/`pnpm` and keeps
+  `dependencies`/`version`/whitelisted fields (6 cases).
 
 External dependencies (config, model service, `nodemailer`,
 `@aws-sdk/client-s3`, logger) are isolated with `vi.mock`, so the tests run
