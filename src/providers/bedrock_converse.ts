@@ -9,6 +9,7 @@ import helper from "../util/helper";
 import WebResponse from "../util/response";
 import AbstractProvider from "./abstract_provider";
 import AnthropicResponse from '../util/anthropic_response';
+import { buildBaseInferenceParams } from '../util/inference_params';
 
 /**
 * BedrockConverse Provider uses boto3-converse api to invoke LLM models and support function calling.
@@ -864,10 +865,11 @@ class MessageConverter {
         const uaMessages = messages.filter(message => message.role === 'user' || message.role === 'assistant' || message.role === 'tool' || message.role === 'function');
         let stopSequences = chatRequest.stop;
 
+        // item 4 修复：非 anthropic 模型不再无条件注入 temperature/topP（否则走 Converse 必 ValidationException）；
+        // anthropic 分支保持 0.7 默认行为不变。见 util/inference_params.ts。
         const inferenceConfig: any = {
             maxTokens,
-            temperature: chatRequest.temperature || 0.7,
-            topP: chatRequest.top_p || 0.7
+            ...buildBaseInferenceParams(config.modelId, chatRequest)
         };
 
         if (thinking) {
