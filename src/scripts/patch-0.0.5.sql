@@ -26,44 +26,21 @@ ALTER TABLE eiai_model ADD CONSTRAINT model_name_uniqe UNIQUE (name);
 
 ALTER TABLE eiai_group_model ADD CONSTRAINT model_group_id_uniqe UNIQUE (model_id, group_id);
 
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('amazon-nova-pro', 1, 'bedrock-converse', '{"modelId": "amazon.nova-pro-v1:0"}', 0.8e-6, 3.2e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('amazon-nova-lite', 1, 'bedrock-converse', '{"modelId": "amazon.nova-lite-v1:0"}', 0.06e-6, 0.24e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('amazon-nova-micro', 1, 'bedrock-converse', '{"modelId": "amazon.nova-micro-v1:0"}', 0.035e-6, 0.14e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('claude-3-7-sonnet', 1, 'bedrock-converse', '{"modelId": "anthropic.claude-3-7-sonnet-20250219-v1:0"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('cr-claude-3-7-sonnet', 1, 'bedrock-converse', '{"modelId": "us.anthropic.claude-3-7-sonnet-20250219-v1:0"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('claude-3-5-sonnet-v2', 1, 'bedrock-converse', '{"modelId": "anthropic.claude-3-5-sonnet-20241022-v2:0"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('claude-3-5-sonnet', 1, 'bedrock-converse', '{"modelId": "anthropic.claude-3-5-sonnet-20240620-v1:0"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('cr-claude-3-5-sonnet-v2', 1, 'bedrock-converse', '{"modelId": "us.anthropic.claude-3-5-sonnet-20241022-v2:0"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('cr-claude-3-5-sonnet', 1, 'bedrock-converse', '{"modelId": "us.anthropic.claude-3-5-sonnet-20240620-v1:0"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('claude-3-5-haiku', 1, 'bedrock-converse', '{"modelId": "anthropic.claude-3-5-haiku-20241022-v1:0"}', 0.8e-6, 4e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('claude-3-sonnet', 1, 'bedrock-converse', '{"modelId": "anthropic.claude-3-sonnet-20240229-v1:0"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('claude-3-haiku', 1, 'bedrock-converse','{"modelId": "anthropic.claude-3-haiku-20240307-v1:0"}', 0.25e-6, 1.25e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('claude-3-opus', 1, 'bedrock-converse','{"modelId": "anthropic.claude-3-opus-20240229-v1:0"}', 15e-6, 75e-6 ) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('mistral-7b', 0, 'bedrock-converse', '{"modelId": "mistral.mistral-7b-instruct-v0:2"}', 0.15e-6, 0.2e-6) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('mistral-8x7b', 0, 'bedrock-converse', '{"modelId": "mistral.mixtral-8x7b-instruct-v0:1"}', 0.45e-6, 0.7e-6) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('mistral-large', 0, 'bedrock-converse','{"modelId": "mistral.mistral-large-2402-v1:0"}', 8e-6, 24e-6) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('mistral-small', 0, 'bedrock-converse','{"modelId": "mistral.mistral-small-2402-v1:0"}', 1e-6, 3e-6) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('llama3-8b', 0, 'bedrock-converse','{"modelId": "meta.llama3-8b-instruct-v1:0"}', 0.4e-6, 0.6e-6) ON CONFLICT (name) DO NOTHING;
-INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out) 
-VALUES ('llama3-70b', 0, 'bedrock-converse','{"modelId": "meta.llama3-70b-instruct-v1:0"}', 2.65e-6, 3.5e-6) ON CONFLICT (name) DO NOTHING;
+-- Seed definition narrowed to two current Claude models (PIPE-104 / PIPE-107).
+-- The 10 legacy Claude 3.x rows were already dropped (Bedrock marks them Legacy
+-- and rejects converse). This revision also removes the 9 non-Claude seeds
+-- (Nova x3 + Mistral x4 + Llama3 x2): the seed is only a starting point; other
+-- models are added per-deployment in /admin. NOTE: this only trims the *seed
+-- definition* for brand-new installs — it never DELETEs rows from an already
+-- deployed database (that path is patch-0.0.42.sql, which leaves non-Claude
+-- rows untouched). Both models use the global. cross-region inference profile
+-- (one list works in every region; us. was US-only). Prices are current AWS
+-- Bedrock / Anthropic standard (global-endpoint) rates as $X/1M = Xe-6:
+--   Sonnet 4.6: $3/1M in, $15/1M out   Opus 4.8: $5/1M in, $25/1M out
+INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out)
+VALUES ('claude-sonnet-4-6', 1, 'bedrock-converse', '{"modelId": "global.anthropic.claude-sonnet-4-6"}', 3e-6, 15e-6 ) ON CONFLICT (name) DO NOTHING;
+INSERT INTO eiai_model (name, multiple, provider, config, price_in, price_out)
+VALUES ('claude-opus-4-8', 1, 'bedrock-converse', '{"modelId": "global.anthropic.claude-opus-4-8"}', 5e-6, 25e-6 ) ON CONFLICT (name) DO NOTHING;
 
 
 INSERT INTO eiai_group (name) VALUES ('group 1');

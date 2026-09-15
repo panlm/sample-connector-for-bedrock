@@ -35,15 +35,26 @@ pnpm build     # build server + UI (build-server && build-ui)
 ### Tests
 
 `pnpm test` runs [Vitest](https://vitest.dev) (`vitest run`). The current suite
-(3 files, 16 cases) covers:
+(6 files, 29 cases) covers:
 
 - `test/helper.test.ts` — the pure helpers `parseModelString`, `genApiKey` and
   `generateUUID` (5 cases).
 - `test/nova_canvas.test.ts` — the `selectChoiceOutputs` helper extracted from
   `nova_canvas.ts`, verifying it returns `undefined` (instead of throwing) when
-  `choices.find` matches nothing, and unchanged values when a choice matches.
+  `choices.find` matches nothing, and unchanged values when a choice matches
+  (3 cases).
 - `test/key_email_regex.test.ts` — the email-key regex in `key.ts`, asserting
-  the simplified character class matches the same inputs as the original.
+  the simplified character class matches the same inputs as the original
+  (8 cases).
+- `test/postgres_delete_multi.test.ts` — `deleteMulti`'s `where` guard, asserting
+  it throws (and never calls `query`) on missing/empty `where` and passes the
+  built SQL and params through otherwise (4 cases).
+- `test/thread_list_key_id.test.ts` — `/user/thread/list` injecting `key_id`,
+  asserting a forged `key_id` is overridden by `ctx.user.id` and the existing
+  `/user/thread/detail` authorization behaviour is unchanged (3 cases).
+- `test/prepare-dist-package.test.ts` — `makeRuntimePackage`, asserting the
+  runtime `package.json` drops `devDependencies`/`scripts`/`pnpm` and keeps
+  `dependencies`/`version`/whitelisted fields (6 cases).
 
 External dependencies (config, model service, `nodemailer`,
 `@aws-sdk/client-s3`, logger) are isolated with `vi.mock`, so the tests run
@@ -145,6 +156,61 @@ export ANTHROPIC_MODEL=your-model
 Models and their parameters can be defined from the backend.
 
 Once defined, models can be bound to groups or API Keys.
+
+### Default seed models
+
+On first install BRConnector seeds a default model list into `eiai_model`
+(`src/scripts/patch-0.0.5.sql`). The seed is now **exactly two Claude models** —
+`claude-sonnet-4-6` and `claude-opus-4-8`. The old Claude 3.x models were dropped
+because Bedrock now marks them **Legacy** and rejects `converse`; the non-Claude
+seeds (Amazon Nova, Mistral, Llama3) were also removed from the default install.
+Those models still work on Bedrock — they are simply no longer seeded. Add any
+model you need (Nova / Mistral / Llama3 / other Claude versions) yourself in
+`/admin`; the seed is only a starting point, and availability depends on your
+account's Bedrock model access.
+
+- **Global cross-region profiles.** Both Claude seeds use the `global.` prefix
+  (`global.anthropic.claude-sonnet-4-6`, `global.anthropic.claude-opus-4-8`).
+  `global.` routes across all regions, so **one seed list works everywhere** —
+  we no longer ship per-region lists. (The old `us.` prefix is US-only; switching
+  an `us.`-seeded install to `eu.`/`apac.` regions leaves half the list unusable.)
+
+- **Seeds are only a starting point.** Whether a model actually answers depends
+  on **your account's Bedrock model access**, not on this seed list. A model can
+  be `ACTIVE` in `list-inference-profiles` yet still be rejected at call time
+  (e.g. Legacy models, or on-demand-unsupported models that require an inference
+  profile). Always verify against your own account. Self-check commands:
+
+  ```bash
+  # Which cross-region inference profiles are ACTIVE in your region
+  aws bedrock list-inference-profiles --region <your-region>
+  # Which foundation models your account can see
+  aws bedrock list-foundation-models --region <your-region>
+  # Confirm a model actually answers (ACTIVE != callable):
+  aws bedrock-runtime converse --region <your-region> \
+    --model-id global.anthropic.claude-sonnet-4-6 \
+    --messages '[{"role":"user","content":[{"text":"ping"}]}]'
+  ```
+
+- **Verifying a model through BRConnector.** After changing a model's `modelId`
+  in the admin UI, the app caches the model list and refreshes it about once a
+  minute (log line `The cache has been flushed`). So the loop is: change the
+  `modelId` → wait ~60s for the cache flush → `POST /v1/chat/completions` once.
+  Calling before the flush shows the old list in `/v1/models` and looks like the
+  change didn't take.
+
+- **Newly created models need a group binding.** A model with no group binding
+  returns `You do not have permission to access the [xxx] model`. The seed
+  migrations bind the default Claude seeds to `group 1` automatically.
+
+> [!IMPORTANT]
+> **Upgrading an existing database:** the seed rebuild ships as a guarded
+> migration (`src/scripts/patch-0.0.42.sql`) that runs once on existing
+> installs — it deletes the 10 legacy Claude 3.x seed rows and inserts the 2
+> current Claude seeds. It only removes rows that still carry their original
+> legacy `modelId` (rows you re-pointed to a working model, and any models you
+> added yourself, are left untouched). **Back up your database before
+> upgrading** so a legacy row can be restored if needed.
 
 ## Changelogs
 

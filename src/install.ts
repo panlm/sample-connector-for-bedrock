@@ -69,6 +69,21 @@ export default async function () {
         console.log("[v0.0.12] Created  successfully.");
     }
 
+    // 0.0.42 install... (rebuild Claude seed list on existing databases; PIPE-104)
+    console.log("[v0.0.42] Check database status...");
+    const sql_0_0_42 = "SELECT to_regclass('public.eiai_migration_0_0_42')";
+    const res_0_0_42 = await client.query(sql_0_0_42);
+    const regClass_0_0_42 = res_0_0_42.rows[0]["to_regclass"];
+    if (regClass_0_0_42) {
+        console.log("[v0.0.42] Migration applied, skip installation.");
+    } else {
+        console.log("[v0.0.42] Migration not applied, installing...");
+        const sqlPath = path.join(__dirname, "./scripts/patch-0.0.42.sql");
+        const sqlCreate_0_0_42 = fs.readFileSync(sqlPath, "utf8");
+        await client.query(sqlCreate_0_0_42);
+        console.log("[v0.0.42] Applied  successfully.");
+    }
+
     await client.end();
     const adminKey = config.admin_api_key;
     if (!adminKey) {
