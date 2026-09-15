@@ -160,8 +160,14 @@ Once defined, models can be bound to groups or API Keys.
 ### Default seed models
 
 On first install BRConnector seeds a default model list into `eiai_model`
-(`src/scripts/patch-0.0.5.sql`). The Claude seeds were rebuilt because Bedrock
-now marks the old Claude 3.x models as **Legacy** and rejects `converse` on them.
+(`src/scripts/patch-0.0.5.sql`). The seed is now **exactly two Claude models** —
+`claude-sonnet-4-6` and `claude-opus-4-8`. The old Claude 3.x models were dropped
+because Bedrock now marks them **Legacy** and rejects `converse`; the non-Claude
+seeds (Amazon Nova, Mistral, Llama3) were also removed from the default install.
+Those models still work on Bedrock — they are simply no longer seeded. Add any
+model you need (Nova / Mistral / Llama3 / other Claude versions) yourself in
+`/admin`; the seed is only a starting point, and availability depends on your
+account's Bedrock model access.
 
 - **Global cross-region profiles.** Both Claude seeds use the `global.` prefix
   (`global.anthropic.claude-sonnet-4-6`, `global.anthropic.claude-opus-4-8`).
