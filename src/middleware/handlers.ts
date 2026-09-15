@@ -3,6 +3,8 @@ import config from '../config';
 import DB from '../util/postgres';
 import Cache from '../util/cache';
 import logger from '../util/logger';
+import crypto from 'crypto';
+import { als, getTraceId } from '../util/trace';
 
 const getUserFromCache = (cache: any, api_key: string) => {
     const keys = cache.api_keys.filter((e: any) => e.api_key === api_key);
@@ -171,10 +173,28 @@ const databaseHandler = async (ctx: any, next: any) => {
 
 
 
+// 业务链最外层（AD-1）：为每个请求确定 traceId（沿用上游头或新生成），
+// 在 next() 之前回写响应头（SSE 一旦 flush 就写不进头），
+// 并用 als.run 把 traceId 传播到整条下游链路。
+const traceContextHandler = async (ctx: any, next: any) => {
+    // 头值只当普通字符串用，不参与任何信任/鉴权决策（NFR-2 / AC-9）。
+    const fromRequestId = ctx.get('X-Request-Id');
+    const fromAmznTrace = ctx.get('X-Amzn-Trace-Id');
+    const traceId =
+        (fromRequestId && fromRequestId.length > 0) ? fromRequestId :
+        (fromAmznTrace && fromAmznTrace.length > 0) ? fromAmznTrace :
+        crypto.randomUUID();
+
+    // 必须在 await next() 之前回写响应头，SSE / 流式路由开始 flush 后就设不进头了。
+    ctx.set('X-Request-Id', traceId);
+
+    // 务必 return，否则 store 在 await 边界后提前失效。
+    return als.run({ traceId }, () => next());
+}
+
 const loggerHandler = async (ctx: any, next: any) => {
-    logger.level = 'silly';
-    logger.defaultMeta.path = ctx.path;
-    ctx.logger = logger;
+    // 请求级 child logger：带上 traceId + path，不再逐请求写进程级共享单例（FR-5 / AD-3）。
+    ctx.logger = logger.child({ traceId: getTraceId(), path: ctx.path });
     await next();
 }
 
@@ -195,4 +215,4 @@ const dataCacheHandler = async (ctx: any, next: any) => {
     await next();
 }
 
-export { errorHandler, authHandler, databaseHandler, loggerHandler, dataCacheHandler };
+export { traceContextHandler, errorHandler, authHandler, databaseHandler, loggerHandler, dataCacheHandler };

@@ -5,6 +5,7 @@ import Koa from "koa";
 import { koaBody as bodyParser } from "koa-body";
 import cors from "@koa/cors";
 import {
+  traceContextHandler,
   authHandler,
   errorHandler,
   databaseHandler,
@@ -72,6 +73,8 @@ if (!config.disableUI) {
     }),
   );
 }
+
+app.use(traceContextHandler);
 
 app.use(loggerHandler);
 
