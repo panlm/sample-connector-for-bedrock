@@ -2,6 +2,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ChatRequest, ResponseData } from "../entity/chat_request";
 import AbstractProvider from "./abstract_provider";
+import logger from "../util/logger";
 
 export default class GeminiConverse extends AbstractProvider {
   private genAI: GoogleGenerativeAI;
@@ -133,7 +134,7 @@ export default class GeminiConverse extends AbstractProvider {
       await this.saveThread(ctx, session_id, chatRequest, response);
 
     } catch (error) {
-      console.error('Gemini streaming error:', error);
+      logger.error('Gemini streaming error:', error);
       ctx.res.write(`data: ${JSON.stringify({ error: error['message']||error })}\n\n`);
     }
 
@@ -192,7 +193,7 @@ export default class GeminiConverse extends AbstractProvider {
       };
 
     } catch (error) {
-      console.error('Gemini sync error:', error);
+      logger.error('Gemini sync error:', error);
       throw error;
     }
   }
