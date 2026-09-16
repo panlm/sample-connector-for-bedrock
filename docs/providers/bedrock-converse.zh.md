@@ -121,13 +121,13 @@ opus-5     temperature   400 The model returned the following errors: `temperatu
 
 - 给 **GPT 系**模型行开 `config.thinking: true` 时，连接器**忽略** thinking 注入——payload 里不出现 `thinking` 字段、`temperature` 也不会被强改为 `1`——并在日志留一条可诊断的 `warn`（`thinking requested but model family does not support it, skipping thinking injection`）。实测 gpt-6 + `config.thinking:true` → **200**。
 
-## 已知限制
+## 已修复（PIPE-130）
 
-以下问题在本轮真链路测试中暴露，属**既有代码**、本轮**未修**（不在本次「GPT 家族裁剪 + thinking 分家族」范围内），配置时需注意：
+以下三条曾在 PIPE-120 真链路测试中暴露、被判为超范围而仅记入「已知限制」的既有缺陷，已在 PIPE-130 修复（真链路逐模型矩阵确认，region `ap-northeast-1`）：
 
-- **`stop` 未按家族裁剪。** 客户端传的 `stop` 会无条件转成 `stopSequences` 发出，因此 gpt-5.6 / gpt-6 / gpt-oss 上带 `stop` 会 `400`（见上表）。
-- **`claude-opus-5` + `temperature` 真链路 400。** opus4+ 的剔除判定用子串 `claude-opus-4`，匹配不到 `claude-opus-5`，故 opus-5 保留了 `temperature`，Bedrock 返回 `` `temperature` is deprecated for this model ``。上表「opus-5 只给 maxTokens → 200」只在**不传** `temperature` 时成立。
-- **`claude-opus-5` + `thinking` 真链路 400。** thinking 硬编码 `type: "enabled"`，而 opus-5 要求 `type: "adaptive"`；`claude-sonnet-4-5` 的 `enabled` thinking 实测 200，问题仅限较新的 opus-5。
+- **`stop` 现按家族逐项裁剪。** `stopSequences` 走 `supportsStopSequences`（与 `supportsThinking` 同模块、同范式）：gpt-5.6 / gpt-6 / gpt-oss 不注入，anthropic 等其余家族保留。注意 gpt-oss 接受 `temperature`/`top_p` 却拒 `stopSequences`，故按**参数轴**逐项判定而非按家族整体开关。
+- **`claude-opus-5` + `temperature` 已正确剔除。** 原子串判定 `includes("claude-opus-4")` 漏掉 `claude-opus-5`/`claude-sonnet-5`，改为 `deprecatesSamplingParams`（代次感知：opus gen≥4 + 任意家族 gen≥5 弃用 temperature/topP；sonnet gen4 及更早保留互斥语义）。真链路确认 opus-5/sonnet-5/opus-4-8 弃用、sonnet-4-5/sonnet-4-6 接受。
+- **`claude-opus-5` + `thinking` 现按代次选 `type`。** 由 `thinkingFields` 决定：上述弃用采样参数的同一代次集合用 `type: "adaptive"`（且**不带** `budget_tokens`，实测传了会 `Extra inputs are not permitted`），`claude-sonnet-4-5` / `claude-sonnet-4-6` 仍用 `type: "enabled"` + `budget_tokens`。GPT 系仍「忽略 + 日志」不回退。
 
 ## 输出结果
 

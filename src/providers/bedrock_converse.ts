@@ -10,7 +10,7 @@ import WebResponse from "../util/response";
 import AbstractProvider from "./abstract_provider";
 import AnthropicResponse from '../util/anthropic_response';
 import { buildBaseInferenceParams } from '../util/inference_params';
-import { supportsThinking } from '../util/bedrock_openai_endpoint';
+import { supportsThinking, supportsStopSequences, deprecatesSamplingParams, thinkingFields } from '../util/bedrock_openai_endpoint';
 
 /**
 * BedrockConverse Provider uses boto3-converse api to invoke LLM models and support function calling.
@@ -889,20 +889,22 @@ export class MessageConverter {
 
         const additionalModelRequestFields: any = {
         }
-        if (stopSequences && Array.isArray(stopSequences)) {
+        // PIPE-130 缺陷 1：stopSequences 按家族逐项裁剪（复用 util 的 supportsStopSequences，
+        // 与 supportsThinking 同范式）。GPT 系拒收 stopSequences → 不注入。
+        if (stopSequences && Array.isArray(stopSequences) && supportsStopSequences(config.modelId)) {
             inferenceConfig.stopSequences = stopSequences.slice(0, 4);
         }
         if (thinkingApplies) {
-            additionalModelRequestFields.thinking = {
-                type: "enabled",
-                budget_tokens: thinkBudget
-            }
+            // PIPE-130 缺陷 3：thinking.type 按代次选择（util 的 thinkingFields，复用同一代次谓词）。
+            // adaptive 代次不接受 budget_tokens；enabled 代次带 budget_tokens。
+            additionalModelRequestFields.thinking = thinkingFields(config.modelId, thinkBudget);
         }
 
         if (config.modelId.includes("anthropic")) {
-            // claude-opus-4 and later models deprecated temperature/topP
-            const isOpus4OrLater = config.modelId.includes("claude-opus-4");
-            if (isOpus4OrLater) {
+            // PIPE-130 缺陷 2：opus gen≥4 + 任意家族 gen≥5 弃用 temperature/topP。
+            // 原 `includes("claude-opus-4")` 会漏掉 claude-opus-5/sonnet-5 等（子串不含 opus-4）→ 误注入 → 400。
+            // 改走 util 的 deprecatesSamplingParams（真链路实测确认的代次边界），不再用会漏的子串匹配。
+            if (deprecatesSamplingParams(config.modelId)) {
                 delete inferenceConfig.temperature;
                 delete inferenceConfig.topP;
             } else {

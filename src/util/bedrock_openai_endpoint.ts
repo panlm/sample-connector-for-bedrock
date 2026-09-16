@@ -98,6 +98,72 @@ export function supportsThinking(modelId: string): boolean {
     return !!modelId && modelId.includes("anthropic");
 }
 
+/**
+ * stopSequences 家族门控（PIPE-130 缺陷 1，唯一实现）.
+ *
+ * `inferenceConfig.stopSequences` 并非所有家族都接受：真链路实测（ap-northeast-1）
+ * gpt-6 与 gpt-oss 均 400 `This model doesn't support the stopSequences field`——注意
+ * gpt-oss 接受 temperature/top_p 却拒 stopSequences，故必须按【参数轴】逐项判定，不能按
+ * 家族整体开关。anthropic / deepseek / llama 等（modelFamily === "other"）实测/现状接受。
+ * 与 `modelFamily` 同模块，避免 provider 里散落 `includes("gpt")` 私判。
+ */
+export function supportsStopSequences(modelId: string): boolean {
+    const fam = modelFamily(modelId);
+    // GPT 两族拒收 stopSequences；其余（other，含 anthropic）接受。
+    return fam !== "gpt-oss" && fam !== "gpt-56-or-6";
+}
+
+/**
+ * Claude 代次解析：从 modelId 抽出 `claude-<family>-<major>` 的家族名与主版本号.
+ *
+ * 兼容新旧两种命名：新式 `claude-opus-5` / `claude-sonnet-4-6` / `claude-fable-5`
+ * （family 在前、版本在后）与推理配置前缀（`global.` / `us.` 等，靠子串匹配穿透）。
+ * 旧式 `claude-3-5-sonnet`（版本在前）没有 `claude-<字母族>-<数字>` 形态 → 返回 null，
+ * 由调用方按 legacy 处理。
+ */
+function claudeGeneration(modelId: string): { family: string; major: number } | null {
+    if (!modelId) return null;
+    const m = modelId.match(/claude-([a-z]+)-(\d+)/);
+    if (!m) return null;
+    return { family: m[1], major: parseInt(m[2], 10) };
+}
+
+/**
+ * 采样参数（temperature/top_p）弃用判定（PIPE-130 缺陷 2，替换原 `includes("claude-opus-4")` 子串）.
+ *
+ * 真链路实测（ap-northeast-1）确认的边界，非按名字规律推断：
+ *   - opus gen≥4（opus-4-5/4-6/4-7/4-8）→ 400 ``temperature`/`top_p` is deprecated``；
+ *   - 任意家族 gen≥5（opus-5 / sonnet-5 / fable-5）→ 同样弃用；
+ *   - sonnet gen4（sonnet-4 / 4-5 / 4-6）→ 接受，保留原「temperature 与 top_p 互斥」语义；
+ *   - claude-3 系及更早 → 接受，保留 legacy 行为。
+ * 命中则 provider 剔除 temperature+topP；未命中走 legacy 互斥分支。
+ */
+export function deprecatesSamplingParams(modelId: string): boolean {
+    const g = claudeGeneration(modelId);
+    if (!g) return false;
+    if (g.major >= 5) return true; // 任意家族 gen≥5
+    if (g.family === "opus" && g.major >= 4) return true; // opus gen≥4
+    return false;
+}
+
+/**
+ * thinking 字段构造（PIPE-130 缺陷 3，替换原硬编码 `type:"enabled"`）.
+ *
+ * 真链路实测（ap-northeast-1）：`deprecatesSamplingParams` 命中的同一集合
+ * （opus-5 / sonnet-5 / opus-4-8 …）要求 `thinking.type=adaptive` 且【不接受】budget_tokens
+ * （`"thinking.type.enabled" is not supported ... Use "thinking.type.adaptive"`；
+ * 传 budget_tokens → `thinking.adaptive.budget_tokens: Extra inputs are not permitted`）。
+ * 老代次（sonnet-4-5 / sonnet-4-6）仍用 `type=enabled` + budget_tokens。两条判定共用同一代次谓词，
+ * 不另起一套。仅 `supportsThinking` 为 true 的家族才会走到这里（GPT 系在 provider 侧「忽略 + 日志」）。
+ */
+export function thinkingFields(modelId: string, budgetTokens: number): Record<string, any> {
+    if (deprecatesSamplingParams(modelId)) {
+        // adaptive 不接受 budget_tokens。
+        return { type: "adaptive" };
+    }
+    return { type: "enabled", budget_tokens: budgetTokens };
+}
+
 export interface InferenceParams {
     temperature?: number;
     top_p?: number;
