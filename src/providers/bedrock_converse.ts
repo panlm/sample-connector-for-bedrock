@@ -10,6 +10,7 @@ import WebResponse from "../util/response";
 import AbstractProvider from "./abstract_provider";
 import AnthropicResponse from '../util/anthropic_response';
 import { buildBaseInferenceParams } from '../util/inference_params';
+import { supportsThinking } from '../util/bedrock_openai_endpoint';
 
 /**
 * BedrockConverse Provider uses boto3-converse api to invoke LLM models and support function calling.
@@ -691,7 +692,7 @@ export default class BedrockConverse extends AbstractProvider {
     }
 }
 
-class MessageConverter {
+export class MessageConverter {
 
     convertImageExt(mime?: string) {
         if (mime.indexOf('image/jpeg') >= 0 || mime.indexOf('image/jpg') >= 0) {
@@ -834,7 +835,16 @@ class MessageConverter {
             thinkBudget = config.thinkBudget;
         }
 
-        if (thinking) {
+        // thinking 是 Anthropic 私有能力：只对支持它的模型家族生效（唯一门控 supportsThinking）。
+        // 非支持家族（如 GPT 系）即使配置/请求开了 thinking，也不注入 temperature=1 / anthropic 私有
+        // thinking 字段 / 抬 maxTokens —— 否则 Bedrock 会因 Anthropic 私有字段 400。留一条可诊断日志，
+        // 不静默丢弃用户意图。
+        const thinkingApplies = thinking && supportsThinking(config.modelId);
+        if (thinking && !thinkingApplies) {
+            console.warn(`[bedrock-converse] thinking requested but model family does not support it, skipping thinking injection. modelId=${config.modelId}`);
+        }
+
+        if (thinkingApplies) {
             if (!thinkBudget || thinkBudget < 1024) {
                 thinkBudget = 1024; // minimum budget_tokens
             }
@@ -872,7 +882,7 @@ class MessageConverter {
             ...buildBaseInferenceParams(config.modelId, chatRequest)
         };
 
-        if (thinking) {
+        if (thinkingApplies) {
             delete inferenceConfig.topP;
             inferenceConfig.temperature = 1;
         }
@@ -882,7 +892,7 @@ class MessageConverter {
         if (stopSequences && Array.isArray(stopSequences)) {
             inferenceConfig.stopSequences = stopSequences.slice(0, 4);
         }
-        if (thinking) {
+        if (thinkingApplies) {
             additionalModelRequestFields.thinking = {
                 type: "enabled",
                 budget_tokens: thinkBudget

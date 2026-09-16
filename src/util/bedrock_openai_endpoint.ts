@@ -85,6 +85,19 @@ export function modelFamily(modelId: string): Family {
     return "other";
 }
 
+/**
+ * thinking 家族门控（唯一实现）.
+ *
+ * `thinking`（含 `temperature: 1` / 删 `topP` / `additionalModelRequestFields.thinking` 抬 maxTokens）
+ * 是 Anthropic 私有能力：只有 anthropic 家族接受。给非支持家族注入这些字段会 400
+ * （Anthropic 私有字段被 Bedrock 拒收）。这是与 `modelFamily` 正交的另一条判定轴
+ * （modelFamily 只区分 gpt-oss / gpt-56-or-6 / other，无 anthropic 语义），故用独立谓词，
+ * 但收在同一模块，保持「所有家族知识一处」，避免 provider 里散落 `includes("anthropic")` 私判。
+ */
+export function supportsThinking(modelId: string): boolean {
+    return !!modelId && modelId.includes("anthropic");
+}
+
 export interface InferenceParams {
     temperature?: number;
     top_p?: number;

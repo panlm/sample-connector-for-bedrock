@@ -19,6 +19,36 @@ describe('buildBaseInferenceParams (item 4 修复)', () => {
         });
     });
 
+    // PIPE-124 缺陷 1：非 anthropic 分支改走单一家族裁剪（trimInferenceParams）。
+    describe('gpt-5.6/6 家族裁剪（Converse 路径接单一家族表）', () => {
+        it('temperature=0.7（非默认）→ 被剔除，结果不含 temperature/topP（核心验收 REQ-1）', () => {
+            expect(buildBaseInferenceParams('global.openai.gpt-6-astra', { temperature: 0.7 })).toEqual({});
+            expect(buildBaseInferenceParams('openai.gpt-5.6', { temperature: 0.7 })).toEqual({});
+        });
+        it('temperature=1（允许值）→ 放行', () => {
+            expect(buildBaseInferenceParams('global.openai.gpt-6-astra', { temperature: 1 })).toEqual({ temperature: 1 });
+        });
+        it('top_p → 一律剔除（gpt-6 不支持 topP）', () => {
+            expect(buildBaseInferenceParams('global.openai.gpt-6-astra', { top_p: 0.9 })).toEqual({});
+            expect(buildBaseInferenceParams('global.openai.gpt-6-astra', { temperature: 0.7, top_p: 0.9 })).toEqual({});
+        });
+    });
+
+    describe('gpt-oss 家族透传（REQ-2：值真的进入 payload，不被裁）', () => {
+        it('temperature=0.7 → 原样透传', () => {
+            expect(buildBaseInferenceParams('openai.gpt-oss-120b-1:0', { temperature: 0.7 })).toEqual({ temperature: 0.7 });
+        });
+        it('top_p=0.9 → 映射为 topP 透传', () => {
+            expect(buildBaseInferenceParams('openai.gpt-oss-120b-1:0', { top_p: 0.9 })).toEqual({ topP: 0.9 });
+        });
+        it('temperature + top_p → 两者都透传', () => {
+            expect(buildBaseInferenceParams('openai.gpt-oss-120b-1:0', { temperature: 0.7, top_p: 0.9 })).toEqual({
+                temperature: 0.7,
+                topP: 0.9,
+            });
+        });
+    });
+
     describe('anthropic 分支行为不变（回归）', () => {
         it('未传 → 仍注入 0.7 默认（与改动前一致）', () => {
             expect(buildBaseInferenceParams('anthropic.claude-3-5-sonnet', {})).toEqual({
