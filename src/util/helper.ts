@@ -29,6 +29,12 @@ const helper = {
             const model = input.substring(0, slashIndex);
             const model_id = input.substring(slashIndex + 1);
 
+            // 任一侧为空串不是合法切分（如 "/claude-3"、"bedrock/"、"/"）——
+            // 返回 null，让调用方保留原始字符串走与未知模型名相同的查表路径。
+            if (model === "" || model_id === "") {
+                return null;
+            }
+
             return { model: model, model_id: model_id };
         } else {
             return null;
