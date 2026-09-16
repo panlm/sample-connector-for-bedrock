@@ -4,6 +4,7 @@ import {
     toEndpointModelId,
     modelFamily,
     trimInferenceParams,
+    supportsThinking,
     resolveAuthMode,
 } from '../src/util/bedrock_openai_endpoint';
 
@@ -118,5 +119,22 @@ describe('resolveAuthMode (单测点④)', () => {
     it('null / undefined config → default', () => {
         expect(resolveAuthMode(null)).toBe('default');
         expect(resolveAuthMode(undefined)).toBe('default');
+    });
+});
+
+// PIPE-124 缺陷 2：thinking 家族门控（唯一实现，与 modelFamily 同模块）。
+describe('supportsThinking', () => {
+    it('anthropic 家族 → true', () => {
+        expect(supportsThinking('anthropic.claude-3-5-sonnet')).toBe(true);
+        expect(supportsThinking('global.anthropic.claude-opus-5')).toBe(true);
+    });
+    it('GPT 系家族 → false', () => {
+        expect(supportsThinking('global.openai.gpt-6-astra')).toBe(false);
+        expect(supportsThinking('openai.gpt-oss-120b-1:0')).toBe(false);
+        expect(supportsThinking('openai.gpt-5.6')).toBe(false);
+    });
+    it('其它 / 空 → false', () => {
+        expect(supportsThinking('deepseek.r1')).toBe(false);
+        expect(supportsThinking('')).toBe(false);
     });
 });

@@ -4,7 +4,11 @@
 
 与 `openai-compatible` 不同，本 Provider **不要求**静态 API key。它默认从 AWS SDK 默认凭证链现场铸造一个短期 Bedrock bearer token，因此 EC2 instance role / Lambda execution role 即可直接使用，模型配置里无需存放任何静态密钥。
 
-> 增量新增，不改动现有的 `bedrock-converse` 和 `openai-compatible`。要用 Bedrock 的 `Converse` / `InvokeModel` 接口请用 `bedrock-converse`；只有当你确实需要对 Bedrock 发 OpenAI Chat Completions 报文时才用本 Provider。
+> 增量新增，不改动现有的 `bedrock-converse` 和 `openai-compatible`。
+>
+> **大多数场景应当默认用 [`bedrock-converse`](bedrock-converse.zh.md)**：它走的 Converse API 同样支持 GPT 系模型（实测 `Converse + global.openai.gpt-6-astra` 只给 `maxTokens` → 200），而且是**唯一同时覆盖 Claude 与 GPT 的 API**——Chat Completions / Responses 只服务 OpenAI 系、Messages 只服务 Anthropic 系（实测跨家族均 `404 The model doesn't exist or doesn't support this API`）。
+>
+> 只有当你确实需要本 Provider 独有的能力时才选它：对 Bedrock 发 **OpenAI Chat Completions 原生报文**，或 `bedrock-mantle` 独有的服务端工具 / `background=true` 异步 / Projects / Workspaces（后者本轮未实现，见下方说明）。
 
 ## 配置
 
