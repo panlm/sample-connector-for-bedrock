@@ -48,3 +48,20 @@
 
 因为 agent 改不了 `.github/`、runtime 的 gh token 也没有 `workflow` scope，把合并策略放 CI
 是流水线唯一无法自我改写的地方（L3-6）。
+
+## 常见拒绝原因
+
+按「最常见 → 最少见」排；notice 文字为 `deny(...)` 输出的 `<msg>` 原文（L52-53），变量以占位符标注。
+
+| 拒绝原因 | Actions 里的 notice 文字 | 怎么修 |
+|---|---|---|
+| 忘打 `auto-merge` label | `no auto-merge label` | `gh pr edit <n> --add-label auto-merge`（L60-61） |
+| 正文没写声明行 | `` PR body has no `Auto-merge-paths:` declaration `` | 正文独占一行写 `Auto-merge-paths: <glob>`（L74-78） |
+| 变更文件超出声明范围 | `files outside declared ownership: [...]` | 扩大 glob 覆盖每个改动文件，或拆掉越界改动（白名单，L79-81） |
+| check 没全绿 | `checks not green: <name>=<state>, ...` | 按报错 check 名修复后 push，等重新跑绿（L71-72） |
+| 读不到 check 状态 | `cannot read check status (rc=<n>) — refusing to merge blind` | 重跑 build 触发；确认 checks 已注册、非空（L69-70） |
+| 存在冲突/不可干净合并 | `mergeable=<值>` | rebase/合 main 解冲突，等回到 `MERGEABLE`（L63） |
+| 合并状态被拦（脏/受阻/落后） | `mergeStateStatus=<DIRTY\|BLOCKED\|BEHIND>` | 更新分支到最新 main、满足分支保护后重试（L64-65） |
+| base 不是 `main` | `base is <x>, not main` | 把 PR 的 base 改成 `main`（L58） |
+| 分支名不以 `agent/` 开头 | `head <名> is not agent/*` | 用 `agent/` 前缀的分支重开 PR（L57） |
+| 跨仓（fork）PR | `cross-repository PR` | 从本仓分支开 PR，不要从 fork 提（L56） |
