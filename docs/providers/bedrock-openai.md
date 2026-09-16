@@ -4,7 +4,11 @@ This Provider calls Amazon Bedrock through its **OpenAI-compatible** surface (th
 
 Unlike `openai-compatible`, this provider does **not** require a static API key. Its default outbound path mints a short-lived Bedrock bearer token from the AWS SDK default credential chain, so an EC2 instance role / Lambda execution role works with no static secret stored in the model config.
 
-> Incremental addition. It does not change the existing `bedrock-converse` or `openai-compatible` providers. Use `bedrock-converse` for Bedrock's `Converse` / `InvokeModel` API; use this provider when you specifically want the OpenAI Chat Completions wire format against Bedrock.
+> Incremental addition. It does not change the existing `bedrock-converse` or `openai-compatible` providers.
+>
+> **For most cases, default to [`bedrock-converse`](bedrock-converse.md)**: its Converse API also supports the GPT family (measured: `Converse + global.openai.gpt-6-astra` with only `maxTokens` → 200), and it is the **only API that covers both Claude and GPT** — Chat Completions / Responses serve only the OpenAI family, Messages serves only the Anthropic family (measured: cross-family calls all return `404 The model doesn't exist or doesn't support this API`).
+>
+> Choose this provider only when you specifically need a capability unique to it: sending **native OpenAI Chat Completions payloads** to Bedrock, or the `bedrock-mantle`-only server-side tools / `background=true` async / Projects / Workspaces (the latter is not implemented in this round — see the note below).
 
 ## Configuration
 
