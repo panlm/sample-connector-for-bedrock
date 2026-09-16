@@ -40,7 +40,7 @@
 |---|---|---|
 | Host | `bedrock-runtime.{region}.amazonaws.com` | `bedrock-mantle.{region}.api.aws` |
 | SigV4 service name | `bedrock` | `bedrock-mantle` |
-| IAM action（调用） | `bedrock:InvokeModel` | `bedrock-mantle:CreateInference` |
+| IAM action（默认 bearer token 路径） | `bedrock:CallWithBearerToken` | `bedrock-mantle:CallWithBearerToken` |
 | `Converse` / `InvokeModel` | 支持（走 `bedrock-converse`） | 不支持 |
 | Guardrails / 智能提示路由 | 支持 | 不支持 |
 | 服务端工具（web search）、`background=true` 异步、Projects / Workspaces | 不支持 | 支持 |
@@ -68,16 +68,31 @@ Bedrock 对推理参数的容忍度按模型家族不同，因此按家族裁剪
 
 ## IAM 前提
 
-出站身份（instance role / execution role，或你配置的静态凭证）必须有权调用所选 endpoint：
+出站身份（instance role / execution role，或你配置的静态凭证）必须有权调用所选 endpoint。**本 Provider 默认不做 SigV4 签名 —— 它现场铸一个短期 Bedrock bearer token 并用它调用**，因此所需 action 是 `CallWithBearerToken`，不是 `InvokeModel`：
 
-| endpointType | 所需 IAM action |
+| endpointType | 所需 IAM action（默认 bearer token 路径） |
 |---|---|
-| `bedrock-runtime` | `bedrock:InvokeModel`、`bedrock:InvokeModelWithResponseStream` |
-| `bedrock-mantle` | `bedrock-mantle:CreateInference` |
+| `bedrock-runtime` | `bedrock:CallWithBearerToken` |
+| `bedrock-mantle` | `bedrock-mantle:CallWithBearerToken` |
 
-⚠️ **随仓库的 `cloudformation/quick-build-brconnector.yaml` 只授予了 `bedrock:InvokeModel*` / `bedrock:ListFoundationModels`。** 若你配置 `bedrock-mantle` endpoint，`bedrock-mantle:CreateInference` **不在**模板里，需要你自行加到 role 的 inline policy —— 否则 mantle 调用会被拒。本轮有意未改模板；在其被合入模板前，加这条 action 属于部署时的步骤。
+### 为什么 bearer token 走 `CallWithBearerToken`、裸 SigV4 走 `InvokeModel`
+
+Bedrock 有两条出站授权路径，二者由**不同**的 IAM action 把关：
+
+- **SigV4（直接签名）。** 用 AWS 凭证对请求做 SigV4 签名，Bedrock 按经典 action 授权（`bedrock:InvokeModel`、`bedrock:InvokeModelWithResponseStream`，或 `bedrock-mantle:CreateInference`）。
+- **Bearer token。** 从凭证铸一个短期 Bedrock bearer token（`@aws/bedrock-token-generator`），以 `Authorization: Bearer <token>` 调用。此时 Bedrock 按 `bedrock:CallWithBearerToken`（runtime）/ `bedrock-mantle:CallWithBearerToken`（mantle）授权 —— **不是** `InvokeModel` / `CreateInference`。
+
+本 Provider 的默认路径就是 bearer token 那条（见开头：从默认凭证链铸 token 交给 OpenAI SDK）。所以默认部署需要 `CallWithBearerToken`；只授 `InvokeModel*` 会得到 `401/403 ... is not authorized to perform: bedrock:CallWithBearerToken`（runtime）或 `bedrock-mantle:CallWithBearerToken`（mantle）。
+
+> ⚠️ **本机用管理员凭证 + `curl --aws-sigv4` 复现不出这个错误。** 那条命令走的是 *SigV4* 路径，管理员凭证永远满足（200）。只有真部署、provider 用一个缺 `CallWithBearerToken` 的 instance role 铸 bearer token 时，错误才暴露。
+
+⚠️ **随仓库的 `cloudformation/quick-build-brconnector.yaml` 只授予了 `bedrock:InvokeModel*` / `bedrock:ListFoundationModels`。** 这些 action 只覆盖 SigV4 路径，**不覆盖**默认的 bearer token 路径。你需要自行把 `bedrock:CallWithBearerToken`（用 `bedrock-mantle` endpoint 时再加 `bedrock-mantle:CallWithBearerToken`）加到 role 的 inline policy。本轮有意未改模板；在其被合入模板前，加这条 action 属于部署时的步骤。
 
 铸造短期 bearer token 本身走 AWS SDK 默认凭证链（`@aws/bedrock-token-generator`）；token 有缓存（约 1h TTL，过期前约 5 分钟刷新），且绝不写入 `process.env`。
+
+**静态 `bearerToken` / 静态 `credentials`（未实测）：** 上面的复现是用默认凭证链（instance role）抓到的，以下两条静态路径在那份报告里**未实测**：
+- 静态 `bearerToken`：连接器原样发送你的 token，授权取决于该 token 背后身份已有的权限 —— 不查连接器自身的 role。未实测。
+- 静态 `credentials`：连接器用这组 AKSK 铸 token 再以 bearer 调用，按上面的推理**预计**需要 `CallWithBearerToken` —— 但这一条**未实测**，属推断，落地前请自行核实。
 
 ## 已知陷阱
 
