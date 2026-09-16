@@ -46,7 +46,7 @@ jobs:
             --json number,headRefName,baseRefName,labels,mergeable,mergeStateStatus,body,files,isCrossRepository \
             > pr.json
           python3 - <<'PY'
-          import json, os, subprocess, sys, fnmatch
+          import json, os, re, subprocess, sys
           pr = json.load(open("pr.json"))
           n  = pr["number"]
           def deny(msg):
@@ -76,9 +76,25 @@ jobs:
               if line.strip().lower().startswith("auto-merge-paths:"):
                   owns = [p.strip() for p in line.split(":",1)[1].split(",") if p.strip()]
           if not owns: deny("PR body has no `Auto-merge-paths:` declaration")
+          # Path-aware glob: `*` must NOT cross a directory separator, otherwise a
+          # declaration that reads as narrow (`src/*`) silently matches `src/a/b/c.ts`
+          # and the ownership gate stops being a concurrency boundary at all.
+          # `**` is the explicit opt-in for recursion.
+          def _glob_re(g):
+              out, i = "", 0
+              while i < len(g):
+                  if g.startswith("**/", i):  out += "(?:.*/)?"; i += 3
+                  elif g.startswith("**", i): out += ".*";       i += 2
+                  elif g[i] == "*":           out += "[^/]*";    i += 1
+                  elif g[i] == "?":           out += "[^/]";     i += 1
+                  else:                       out += re.escape(g[i]); i += 1
+              return re.compile("\\A" + out + "\\Z")
+          pats = [_glob_re(g) for g in owns]
           changed = [f["path"] for f in pr["files"]]
-          stray = [p for p in changed if not any(fnmatch.fnmatch(p, g) for g in owns)]
-          if stray: deny(f'files outside declared ownership: {stray[:6]}')
+          stray = [p for p in changed if not any(r.match(p) for r in pats)]
+          if stray:
+              deny(f'{len(stray)} of {len(changed)} file(s) outside declared ownership: {stray[:6]}'
+                   + (" ..." if len(stray) > 6 else ""))
           print(f"::notice::auto-merge gates passed for #{n}; {len(changed)} file(s) within {owns}")
           open("/tmp/go","w").write("go")   # 所有闸门通过的唯一信号
           PY
