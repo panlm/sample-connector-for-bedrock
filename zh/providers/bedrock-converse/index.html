@@ -1316,6 +1316,56 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
+        支持的模型家族与参数容忍度
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="支持的模型家族与参数容忍度">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        连接器如何按家族裁剪
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        thinking 的适用范围
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知限制
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         输出结果
       
     </span>
@@ -1800,6 +1850,56 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
+        支持的模型家族与参数容忍度
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="支持的模型家族与参数容忍度">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        连接器如何按家族裁剪
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        thinking 的适用范围
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知限制
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         输出结果
       
     </span>
@@ -1963,10 +2063,101 @@
 <a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="p">}</span>
 <a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="p">}</span>
 </code></pre></div>
-<h2 id="_2">输出结果<a class="headerlink" href="#_2" title="Permanent link">¶</a></h2>
+<h2 id="_2">支持的模型家族与参数容忍度<a class="headerlink" href="#_2" title="Permanent link">¶</a></h2>
+<p>Converse 是<strong>唯一同时覆盖 Claude 与 GPT 系的 Bedrock API</strong>，所以本 Provider 既能配 Anthropic 模型，也能配 GPT 系（<code>global.openai.gpt-6-astra</code>、<code>global.openai.gpt-5.6-terra</code>、<code>openai.gpt-oss-120b-1:0</code> 等）。但不同家族对推理参数的容忍度不同，客户端一传参就可能被 Bedrock 拒。</p>
+<p>下表为<strong>实测</strong>结果（region <code>ap-northeast-1</code>，真实 <code>ConverseCommand</code> / <code>ConverseStreamCommand</code> 调用，隔离单个参数；<code>maxTokens=1024</code> 为基线）：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>gpt-6</th>
+<th>gpt-5.6</th>
+<th>gpt-oss</th>
+<th>claude-opus-5</th>
+<th>claude-sonnet-4-5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>maxTokens</code>（基线）</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>temperature=0.7</code></td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>topP=0.9</code></td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>stopSequences</code></td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>stream</code></td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>tools</code> + <code>toolChoice</code></td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+</tbody>
+</table>
+<p>拒绝时的原始报文（节选）：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gpt-6      temperature   400 This model doesn't support the temperature field. Remove temperature and try again.
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>gpt-6      topP          400 This model doesn't support the topP field. Remove topP and try again.
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>gpt-oss    stopSequences 400 This model doesn't support the stopSequences field. Remove stopSequences and try again.
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>opus-5     temperature   400 The model returned the following errors: `temperature` is deprecated for this model.
+</code></pre></div>
+<p>一个<strong>对客户端有利的不对称</strong>：<code>maxTokens</code> 在 Converse + gpt-6 上<strong>被接受</strong>，而同一模型走 <code>bedrock-openai</code> 的 Chat Completions 时 <code>max_tokens</code> 会被拒（要 <code>max_completion_tokens</code>）。即 Converse 这条路对客户端参数更宽容。</p>
+<h3 id="_3">连接器如何按家族裁剪<a class="headerlink" href="#_3" title="Permanent link">¶</a></h3>
+<p>为了让「客户端传了 GPT 家族不接受的参数」也能成功，本 Provider 在把请求转成 Converse payload 时按家族裁剪（与 <code>bedrock-openai</code> <strong>共用同一张家族表</strong>，不各写一份）：</p>
+<ul>
+<li><strong><code>gpt-5.6-*</code> / <code>gpt-6-*</code></strong>：剔掉 <code>temperature</code>（除非等于允许值 <code>1</code>）与 <code>top_p</code>（<code>topP</code>）。所以客户端传 <code>temperature: 0.7</code> 会被裁掉后 → 200，而不是 400。</li>
+<li><strong><code>gpt-oss-*</code></strong>：<code>temperature</code> / <code>top_p</code> <strong>原样透传</strong>（实测接受 <code>0.7</code>），值真的进 payload。</li>
+<li><strong><code>anthropic</code> 家族</strong>：行为与本次改动前<strong>字节级一致</strong>（<code>0.7</code> 默认 + opus4 剔除 + <code>temperature</code>/<code>topP</code> 互斥）。</li>
+</ul>
+<h2 id="thinking">thinking 的适用范围<a class="headerlink" href="#thinking" title="Permanent link">¶</a></h2>
+<p><code>thinking</code>（来自请求体或模型配置 <code>config.thinking</code>）触发三处注入：抬升 <code>maxTokens</code> 到 <code>thinkBudget</code>、设 <code>temperature=1</code> 并删 <code>topP</code>、注入 Anthropic 私有字段 <code>additionalModelRequestFields.thinking</code>。这些<strong>只对支持 thinking 的模型家族生效（实测为 Anthropic 系）</strong>。</p>
+<ul>
+<li>给 <strong>GPT 系</strong>模型行开 <code>config.thinking: true</code> 时，连接器<strong>忽略</strong> thinking 注入——payload 里不出现 <code>thinking</code> 字段、<code>temperature</code> 也不会被强改为 <code>1</code>——并在日志留一条可诊断的 <code>warn</code>（<code>thinking requested but model family does not support it, skipping thinking injection</code>）。实测 gpt-6 + <code>config.thinking:true</code> → <strong>200</strong>。</li>
+</ul>
+<h2 id="_4">已知限制<a class="headerlink" href="#_4" title="Permanent link">¶</a></h2>
+<p>以下问题在本轮真链路测试中暴露，属<strong>既有代码</strong>、本轮<strong>未修</strong>（不在本次「GPT 家族裁剪 + thinking 分家族」范围内），配置时需注意：</p>
+<ul>
+<li><strong><code>stop</code> 未按家族裁剪。</strong> 客户端传的 <code>stop</code> 会无条件转成 <code>stopSequences</code> 发出，因此 gpt-5.6 / gpt-6 / gpt-oss 上带 <code>stop</code> 会 <code>400</code>（见上表）。</li>
+<li><strong><code>claude-opus-5</code> + <code>temperature</code> 真链路 400。</strong> opus4+ 的剔除判定用子串 <code>claude-opus-4</code>，匹配不到 <code>claude-opus-5</code>，故 opus-5 保留了 <code>temperature</code>，Bedrock 返回 <code>`temperature` is deprecated for this model</code>。上表「opus-5 只给 maxTokens → 200」只在<strong>不传</strong> <code>temperature</code> 时成立。</li>
+<li><strong><code>claude-opus-5</code> + <code>thinking</code> 真链路 400。</strong> thinking 硬编码 <code>type: "enabled"</code>，而 opus-5 要求 <code>type: "adaptive"</code>；<code>claude-sonnet-4-5</code> 的 <code>enabled</code> thinking 实测 200，问题仅限较新的 opus-5。</li>
+</ul>
+<h2 id="_5">输出结果<a class="headerlink" href="#_5" title="Permanent link">¶</a></h2>
 <p>输出中增加了 reasoning_content 字段，与 deepseek 的输出保持一致。如下：</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="err">da</span><span class="kc">ta</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="s2">"3"</span><span class="p">,</span><span class="nt">"created"</span><span class="p">:</span><span class="mi">1740468210</span><span class="p">,</span><span class="nt">"object"</span><span class="p">:</span><span class="s2">"text_completion"</span><span class="p">,</span><span class="nt">"choices"</span><span class="p">:[{</span><span class="nt">"index"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">"delta"</span><span class="p">:{</span><span class="nt">"role"</span><span class="p">:</span><span class="s2">"assistant"</span><span class="p">,</span><span class="nt">"content"</span><span class="p">:</span><span class="s2">""</span><span class="p">,</span><span class="nt">"reasoning_content"</span><span class="p">:</span><span class="s2">"你好"</span><span class="p">},</span><span class="nt">"finish_reason"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">"logprobs"</span><span class="p">:</span><span class="kc">null</span><span class="p">}],</span><span class="nt">"model"</span><span class="p">:</span><span class="s2">"sonnet37-think"</span><span class="p">}</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="err">...</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="err">da</span><span class="kc">ta</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="s2">"3"</span><span class="p">,</span><span class="nt">"created"</span><span class="p">:</span><span class="mi">1740468210</span><span class="p">,</span><span class="nt">"object"</span><span class="p">:</span><span class="s2">"text_completion"</span><span class="p">,</span><span class="nt">"choices"</span><span class="p">:[{</span><span class="nt">"index"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">"delta"</span><span class="p">:{</span><span class="nt">"role"</span><span class="p">:</span><span class="s2">"assistant"</span><span class="p">,</span><span class="nt">"content"</span><span class="p">:</span><span class="s2">""</span><span class="p">,</span><span class="nt">"reasoning_content"</span><span class="p">:</span><span class="s2">"你好"</span><span class="p">},</span><span class="nt">"finish_reason"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">"logprobs"</span><span class="p">:</span><span class="kc">null</span><span class="p">}],</span><span class="nt">"model"</span><span class="p">:</span><span class="s2">"sonnet37-think"</span><span class="p">}</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="err">...</span>
 </code></pre></div>
 
 
@@ -1990,7 +2181,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="2025年4月25日 15:51:11 CST"><span class="timeago" datetime="2025-04-25T15:51:11+08:00" locale="zh"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="2025年4月25日 15:51:11 CST">2025-04-25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="2026年9月16日 10:31:19 CST"><span class="timeago" datetime="2026-09-16T10:31:19+08:00" locale="zh"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="2026年9月16日 10:31:19 CST">2026-09-16</span>
   </span>
 
     

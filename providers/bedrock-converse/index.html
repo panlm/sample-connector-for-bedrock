@@ -1311,6 +1311,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#supported-model-families-and-parameter-tolerance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported model families and parameter tolerance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported model families and parameter tolerance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-the-connector-trims-per-family" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the connector trims per family
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope-of-thinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope of thinking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#output-results" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1795,6 +1845,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#supported-model-families-and-parameter-tolerance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported model families and parameter tolerance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported model families and parameter tolerance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-the-connector-trims-per-family" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How the connector trims per family
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope-of-thinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope of thinking
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#output-results" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1929,10 +2029,101 @@ Please note that the total number of prompt caches should not exceed the limit d
 <a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nt">"thinkBudget"</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span>
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
 </code></pre></div>
+<h2 id="supported-model-families-and-parameter-tolerance">Supported model families and parameter tolerance<a class="headerlink" href="#supported-model-families-and-parameter-tolerance" title="Permanent link">¶</a></h2>
+<p>Converse is the <strong>only Bedrock API that covers both the Claude and GPT families</strong>, so this provider can be configured with Anthropic models as well as GPT-family models (<code>global.openai.gpt-6-astra</code>, <code>global.openai.gpt-5.6-terra</code>, <code>openai.gpt-oss-120b-1:0</code>, etc.). Different families tolerate inference parameters differently, so a client that sends a parameter can get rejected by Bedrock.</p>
+<p>The table below is <strong>measured</strong> (region <code>ap-northeast-1</code>, real <code>ConverseCommand</code> / <code>ConverseStreamCommand</code> calls, one parameter in isolation; <code>maxTokens=1024</code> as baseline):</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>gpt-6</th>
+<th>gpt-5.6</th>
+<th>gpt-oss</th>
+<th>claude-opus-5</th>
+<th>claude-sonnet-4-5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>maxTokens</code> (baseline)</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>temperature=0.7</code></td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>topP=0.9</code></td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>stopSequences</code></td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>❌ 400</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>stream</code></td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+<tr>
+<td><code>tools</code> + <code>toolChoice</code></td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+<td>✅ 200</td>
+</tr>
+</tbody>
+</table>
+<p>Raw rejection messages (excerpt):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gpt-6      temperature   400 This model doesn't support the temperature field. Remove temperature and try again.
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>gpt-6      topP          400 This model doesn't support the topP field. Remove topP and try again.
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>gpt-oss    stopSequences 400 This model doesn't support the stopSequences field. Remove stopSequences and try again.
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>opus-5     temperature   400 The model returned the following errors: `temperature` is deprecated for this model.
+</code></pre></div>
+<p>One <strong>client-friendly asymmetry</strong>: <code>maxTokens</code> is <strong>accepted</strong> on Converse + gpt-6, whereas the same model on <code>bedrock-openai</code>’s Chat Completions rejects <code>max_tokens</code> (it wants <code>max_completion_tokens</code>). So Converse is the more forgiving path for client parameters.</p>
+<h3 id="how-the-connector-trims-per-family">How the connector trims per family<a class="headerlink" href="#how-the-connector-trims-per-family" title="Permanent link">¶</a></h3>
+<p>So that a client sending a parameter a GPT family doesn’t accept still succeeds, this provider trims per family when building the Converse payload (sharing the <strong>same family table</strong> as <code>bedrock-openai</code>, not a second copy):</p>
+<ul>
+<li><strong><code>gpt-5.6-*</code> / <code>gpt-6-*</code></strong>: <code>temperature</code> is dropped (unless it equals the allowed value <code>1</code>) and <code>top_p</code> (<code>topP</code>) is dropped. So a client sending <code>temperature: 0.7</code> gets it trimmed → 200 instead of 400.</li>
+<li><strong><code>gpt-oss-*</code></strong>: <code>temperature</code> / <code>top_p</code> are <strong>passed through unchanged</strong> (measured to accept <code>0.7</code>); the value really lands in the payload.</li>
+<li><strong><code>anthropic</code> family</strong>: behaviour is <strong>byte-for-byte identical</strong> to before this change (<code>0.7</code> default + opus4 removal + <code>temperature</code>/<code>topP</code> mutual exclusion).</li>
+</ul>
+<h2 id="scope-of-thinking">Scope of thinking<a class="headerlink" href="#scope-of-thinking" title="Permanent link">¶</a></h2>
+<p><code>thinking</code> (from the request body or the model config <code>config.thinking</code>) triggers three injections: raising <code>maxTokens</code> to <code>thinkBudget</code>, setting <code>temperature=1</code> and deleting <code>topP</code>, and injecting the Anthropic-private field <code>additionalModelRequestFields.thinking</code>. These <strong>only take effect for model families that support thinking (measured: the Anthropic family)</strong>.</p>
+<ul>
+<li>When <code>config.thinking: true</code> is set on a <strong>GPT-family</strong> model row, the connector <strong>ignores</strong> the thinking injection — no <code>thinking</code> field appears in the payload and <code>temperature</code> is not forced to <code>1</code> — and leaves a diagnosable <code>warn</code> in the log (<code>thinking requested but model family does not support it, skipping thinking injection</code>). Measured: gpt-6 + <code>config.thinking:true</code> → <strong>200</strong>.</li>
+</ul>
+<h2 id="known-limitations">Known limitations<a class="headerlink" href="#known-limitations" title="Permanent link">¶</a></h2>
+<p>The following were exposed by this round’s live testing but are <strong>pre-existing code</strong>, <strong>not fixed</strong> in this round (out of scope for “GPT family trimming + thinking by family”). Keep them in mind when configuring:</p>
+<ul>
+<li><strong><code>stop</code> is not trimmed per family.</strong> A client <code>stop</code> is converted unconditionally to <code>stopSequences</code>, so sending <code>stop</code> on gpt-5.6 / gpt-6 / gpt-oss returns <code>400</code> (see the table above).</li>
+<li><strong><code>claude-opus-5</code> + <code>temperature</code> returns 400 live.</strong> The opus4+ removal check matches the substring <code>claude-opus-4</code>, which misses <code>claude-opus-5</code>, so opus-5 keeps <code>temperature</code> and Bedrock returns <code>`temperature` is deprecated for this model</code>. The table’s “opus-5 baseline → 200” only holds when <code>temperature</code> is <strong>not</strong> sent.</li>
+<li><strong><code>claude-opus-5</code> + <code>thinking</code> returns 400 live.</strong> Thinking hard-codes <code>type: "enabled"</code>, but opus-5 requires <code>type: "adaptive"</code>; <code>claude-sonnet-4-5</code> with <code>enabled</code> thinking is measured at 200, so the issue is limited to the newer opus-5.</li>
+</ul>
 <h2 id="output-results">Output Results<a class="headerlink" href="#output-results" title="Permanent link">¶</a></h2>
 <p>The output adds a reasoning_content field, consistent with deepseek’s output. As follows:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="err">da</span><span class="kc">ta</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="s2">"3"</span><span class="p">,</span><span class="nt">"created"</span><span class="p">:</span><span class="mi">1740468210</span><span class="p">,</span><span class="nt">"object"</span><span class="p">:</span><span class="s2">"text_completion"</span><span class="p">,</span><span class="nt">"choices"</span><span class="p">:[{</span><span class="nt">"index"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">"delta"</span><span class="p">:{</span><span class="nt">"role"</span><span class="p">:</span><span class="s2">"assistant"</span><span class="p">,</span><span class="nt">"content"</span><span class="p">:</span><span class="s2">""</span><span class="p">,</span><span class="nt">"reasoning_content"</span><span class="p">:</span><span class="s2">"hello"</span><span class="p">},</span><span class="nt">"finish_reason"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">"logprobs"</span><span class="p">:</span><span class="kc">null</span><span class="p">}],</span><span class="nt">"model"</span><span class="p">:</span><span class="s2">"sonnet37-think"</span><span class="p">}</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="err">...</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="err">da</span><span class="kc">ta</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="s2">"3"</span><span class="p">,</span><span class="nt">"created"</span><span class="p">:</span><span class="mi">1740468210</span><span class="p">,</span><span class="nt">"object"</span><span class="p">:</span><span class="s2">"text_completion"</span><span class="p">,</span><span class="nt">"choices"</span><span class="p">:[{</span><span class="nt">"index"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nt">"delta"</span><span class="p">:{</span><span class="nt">"role"</span><span class="p">:</span><span class="s2">"assistant"</span><span class="p">,</span><span class="nt">"content"</span><span class="p">:</span><span class="s2">""</span><span class="p">,</span><span class="nt">"reasoning_content"</span><span class="p">:</span><span class="s2">"hello"</span><span class="p">},</span><span class="nt">"finish_reason"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="nt">"logprobs"</span><span class="p">:</span><span class="kc">null</span><span class="p">}],</span><span class="nt">"model"</span><span class="p">:</span><span class="s2">"sonnet37-think"</span><span class="p">}</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="err">...</span>
 </code></pre></div>
 
 
@@ -1956,7 +2147,7 @@ Please note that the total number of prompt caches should not exceed the limit d
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"></path></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 29, 2025 00:52:37 CST"><span class="timeago" datetime="2025-10-29T00:52:37+08:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 29, 2025 00:52:37 CST">2025-10-29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 16, 2026 10:31:19 CST"><span class="timeago" datetime="2026-09-16T10:31:19+08:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 16, 2026 10:31:19 CST">2026-09-16</span>
   </span>
 
     
